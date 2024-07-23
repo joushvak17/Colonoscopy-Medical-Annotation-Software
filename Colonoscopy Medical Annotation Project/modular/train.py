@@ -13,7 +13,7 @@ sys.path.append("modular/models")
 import data_setup, engine, baseline_model
 
 # Setup hyperparameters
-NUM_EP0CHS = 10
+NUM_EPOCHS = 10
 BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 HIDDEN_UNITS = 10
