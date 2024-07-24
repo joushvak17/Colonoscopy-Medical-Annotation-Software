@@ -9,6 +9,7 @@ import inspect
 
 import torch
 from torchvision import transforms
+import torchvision.models as models
 
 import importlib.util
 
@@ -35,6 +36,7 @@ parser.add_argument("--batch_size", type=int, default=32, help="Number of sample
 parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate for the optimizer.")
 parser.add_argument("--hidden_units", type=int, default=10, help="Number of hidden units in the model.")
 parser.add_argument("--model_path", type=str, default="models/baseline_model.py", help=f"Path to the model file. Available models: {list_models()}")
+parser.add_argument("--transfer_learning", action="store_true", help="Indicate if the model is a transfer learning model.")
 
 # Parse the arguments
 args = parser.parse_args()
@@ -45,11 +47,36 @@ BATCH_SIZE = args.batch_size
 LEARNING_RATE = args.learning_rate
 HIDDEN_UNITS = args.hidden_units
 
+# Setup the default transformations
+data_transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor()
+])
+
+# Define the mapping of model names to their torchvision equivalents and default transformations
+TRANSFER_LEARNING_MODELS = {
+    "vgg19": models.VGG19_Weights.DEFAULT
+}
+
 # Import the specified model
 model_script_path = os.path.join(script_dir, args.model_path)
 spec = importlib.util.spec_from_file_location("model_module", model_script_path)
 model_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(model_module)
+
+# Define a function that returns the correct transformation
+def get_transforms(model_name):
+    if model_name in TRANSFER_LEARNING_MODELS:
+        weights = TRANSFER_LEARNING_MODELS[model_name]
+        return weights.transform()
+    else:
+        default_transform = transforms.Compose([transforms.Resize((224, 224)), 
+                                             transforms.ToTensor()])
+        return default_transform
+
+# Get the transformation based on the model name
+model_name = os.path.basename(args.model_path).replace(".py", "")
+data_transform = get_transforms(model_name)
 
 model_class = None
 for name, obj in inspect.getmembers(model_module):
@@ -67,12 +94,6 @@ test_dir = "data/testing"
 # Setup target device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# Setup the transformations
-data_transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor()
-])
-
 # Create the DataLoaders using data_setup.py
 train_loader, test_loader, class_names = data_setup.create_dataloaders(train_dir, 
                                                                        test_dir, 
@@ -80,7 +101,7 @@ train_loader, test_loader, class_names = data_setup.create_dataloaders(train_dir
                                                                        BATCH_SIZE)
 
 # Create the model
-model = model_class(input_shape=3, 
+model = model_class(input_shape=3*224*224, 
                     hidden_units=HIDDEN_UNITS, 
                     output_shape=len(class_names)).to(device)
 
