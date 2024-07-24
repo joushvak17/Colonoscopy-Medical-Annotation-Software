@@ -35,6 +35,7 @@ parser.add_argument("--num_epochs", type=int, default=5, help="Number of epochs 
 parser.add_argument("--batch_size", type=int, default=32, help="Number of samples per batch.")
 parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate for the optimizer.")
 parser.add_argument("--hidden_units", type=int, default=10, help="Number of hidden units in the model.")
+# FIXME: Need to get rid of the default model path and make it a required argument
 parser.add_argument("--model_path", type=str, default="models/baseline_model.py", help=f"Path to the model file. Available models: {list_models()}")
 parser.add_argument("--transfer_learning", action="store_true", help="Indicate if the model is a transfer learning model.")
 
@@ -47,15 +48,9 @@ BATCH_SIZE = args.batch_size
 LEARNING_RATE = args.learning_rate
 HIDDEN_UNITS = args.hidden_units
 
-# Setup the default transformations
-data_transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor()
-])
-
 # Define the mapping of model names to their torchvision equivalents and default transformations
 TRANSFER_LEARNING_MODELS = {
-    "vgg19": models.VGG19_Weights.DEFAULT
+    "vgg19_model": models.VGG19_Weights.DEFAULT
 }
 
 # Import the specified model
@@ -68,7 +63,8 @@ spec.loader.exec_module(model_module)
 def get_transforms(model_name):
     if model_name in TRANSFER_LEARNING_MODELS:
         weights = TRANSFER_LEARNING_MODELS[model_name]
-        return weights.transform()
+        transfer_transform = weights.transforms()
+        return transfer_transform
     else:
         default_transform = transforms.Compose([transforms.Resize((224, 224)), 
                                              transforms.ToTensor()])
@@ -101,7 +97,7 @@ train_loader, test_loader, class_names = data_setup.create_dataloaders(train_dir
                                                                        BATCH_SIZE)
 
 # Create the model
-model = model_class(input_shape=3*224*224, 
+model = model_class(input_shape=3, 
                     hidden_units=HIDDEN_UNITS, 
                     output_shape=len(class_names)).to(device)
 
