@@ -3,6 +3,8 @@ Defines the training script for the PyTorch model.
 """
 import os
 
+import argparse
+
 import torch
 from torchvision import transforms
 
@@ -12,11 +14,23 @@ sys.path.append("modular/models")
 
 import data_setup, engine, baseline_model
 
+# Create ArgumentParser object
+parser = argparse.ArgumentParser(description="Train a PyTorch model.")
+
+# Add the arguments
+parser.add_argument("--num_epochs", type=int, default=5, help="Number of epochs to train the model.")
+parser.add_argument("--batch_size", type=int, default=32, help="Number of samples per batch.")
+parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate for the optimizer.")
+parser.add_argument("--hidden_units", type=int, default=10, help="Number of hidden units in the model.")
+
+# Parse the arguments
+args = parser.parse_args()
+
 # Setup hyperparameters
-NUM_EPOCHS = 10
-BATCH_SIZE = 32
-LEARNING_RATE = 0.001
-HIDDEN_UNITS = 10
+NUM_EPOCHS = args.num_epochs
+BATCH_SIZE = args.batch_size
+LEARNING_RATE = args.learning_rate
+HIDDEN_UNITS = args.hidden_units
 
 # Setup the directories
 train_dir = "data/training"
