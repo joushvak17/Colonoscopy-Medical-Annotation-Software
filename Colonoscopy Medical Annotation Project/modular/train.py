@@ -5,12 +5,16 @@ import os
 
 import argparse
 
+import inspect
+
 import torch
 from torchvision import transforms
 
 import importlib.util
 
 import sys
+# Adjust the path to include the modular directory and where the scripts are located
+script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append("modular")
 sys.path.append("modular/models")
 
@@ -18,7 +22,8 @@ import data_setup, engine
 
 # Function to list available models
 def list_models():
-    model_files = [f for f in os.listdir("models") if f.endswith(".py")]
+    models_dir = os.path.join(script_dir, "models")
+    model_files = [f for f in os.listdir(models_dir) if f.endswith(".py")]
     return ", ".join(model_files)
 
 # Create ArgumentParser object
@@ -41,10 +46,19 @@ LEARNING_RATE = args.learning_rate
 HIDDEN_UNITS = args.hidden_units
 
 # Import the specified model
-model_script_path = args.model_path
-spec = importlib.util.spec_from_file_location("module.name", model_script_path)
+model_script_path = os.path.join(script_dir, args.model_path)
+spec = importlib.util.spec_from_file_location("model_module", model_script_path)
 model_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(model_module)
+
+model_class = None
+for name, obj in inspect.getmembers(model_module):
+    if inspect.isclass(obj):
+        model_class = obj
+        break
+
+if model_class is None:
+    raise ValueError(f"Model class not found in {model_script_path}")
 
 # Setup the directories
 train_dir = "data/training"
@@ -66,9 +80,9 @@ train_loader, test_loader, class_names = data_setup.create_dataloaders(train_dir
                                                                        BATCH_SIZE)
 
 # Create the model
-model = model_module.BaseLine(input_shape=224*224*3, 
-                              hidden_units=HIDDEN_UNITS, 
-                              output_shape=len(class_names)).to(device)
+model = model_class(input_shape=224*224*3, 
+                     hidden_units=HIDDEN_UNITS, 
+                     output_shape=len(class_names)).to(device)
 
 # Set the loss function and optimizer
 loss_fn = torch.nn.CrossEntropyLoss()
