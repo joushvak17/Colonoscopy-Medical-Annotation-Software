@@ -8,11 +8,18 @@ import argparse
 import torch
 from torchvision import transforms
 
+import importlib.util
+
 import sys
 sys.path.append("modular")
 sys.path.append("modular/models")
 
-import data_setup, engine, baseline_model
+import data_setup, engine
+
+# Function to list available models
+def list_models():
+    model_files = [f for f in os.listdir("models") if f.endswith(".py")]
+    return ", ".join(model_files)
 
 # Create ArgumentParser object
 parser = argparse.ArgumentParser(description="Train a PyTorch model.")
@@ -22,6 +29,7 @@ parser.add_argument("--num_epochs", type=int, default=5, help="Number of epochs 
 parser.add_argument("--batch_size", type=int, default=32, help="Number of samples per batch.")
 parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate for the optimizer.")
 parser.add_argument("--hidden_units", type=int, default=10, help="Number of hidden units in the model.")
+parser.add_argument("--model_path", type=str, default="models/baseline_model.py", help=f"Path to the model file. Available models: {list_models()}")
 
 # Parse the arguments
 args = parser.parse_args()
@@ -31,6 +39,12 @@ NUM_EPOCHS = args.num_epochs
 BATCH_SIZE = args.batch_size
 LEARNING_RATE = args.learning_rate
 HIDDEN_UNITS = args.hidden_units
+
+# Import the specified model
+model_script_path = args.model_path
+spec = importlib.util.spec_from_file_location("module.name", model_script_path)
+model_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(model_module)
 
 # Setup the directories
 train_dir = "data/training"
@@ -52,9 +66,9 @@ train_loader, test_loader, class_names = data_setup.create_dataloaders(train_dir
                                                                        BATCH_SIZE)
 
 # Create the model
-model = baseline_model.BaseLine(input_shape=224*224*3,
-                                hidden_units=HIDDEN_UNITS,
-                                output_shape=len(class_names)).to(device)
+model = model_module.BaseLine(input_shape=224*224*3, 
+                              hidden_units=HIDDEN_UNITS, 
+                              output_shape=len(class_names)).to(device)
 
 # Set the loss function and optimizer
 loss_fn = torch.nn.CrossEntropyLoss()
