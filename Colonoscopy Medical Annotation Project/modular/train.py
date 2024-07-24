@@ -18,7 +18,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append("modular")
 sys.path.append("modular/models")
 
-import data_setup, engine
+import data_setup, engine, utils
 
 # Function to list available models
 def list_models():
@@ -91,4 +91,10 @@ optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 # Start training the model using engine.py
 engine.train(model, train_loader, test_loader, loss_fn, optimizer, device, NUM_EPOCHS)
 
-# TODO: Save the model using utils.py
+# Prompt the user to save the model
+save_prompt = input("Do you want to save the model? (yes/no): ").lower()
+if save_prompt == "yes":
+    model_name = input("Enter the model name (without extension): ")
+    utils.save_model(model, "saved_models", model_name + ".pth")
+else: 
+    print("Okay model will not be saved.")
