@@ -80,9 +80,9 @@ train_loader, test_loader, class_names = data_setup.create_dataloaders(train_dir
                                                                        BATCH_SIZE)
 
 # Create the model
-model = model_class(input_shape=224*224*3, 
-                     hidden_units=HIDDEN_UNITS, 
-                     output_shape=len(class_names)).to(device)
+model = model_class(input_shape=3, 
+                    hidden_units=HIDDEN_UNITS, 
+                    output_shape=len(class_names)).to(device)
 
 # Set the loss function and optimizer
 loss_fn = torch.nn.CrossEntropyLoss()
