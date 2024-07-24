@@ -62,3 +62,5 @@ optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
 # Start training the model using engine.py
 engine.train(model, train_loader, test_loader, loss_fn, optimizer, device, NUM_EPOCHS)
+
+# TODO: Save the model using utils.py
