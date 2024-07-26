@@ -113,7 +113,9 @@ def train(model: torch.nn.Module,
           loss_fn: torch.nn.Module,
           optimizer: torch.optim.Optimizer,
           device: torch.device,
-          epochs: int) -> Dict[str, List[float]]:
+          epochs: int,
+          patience: int = 5,
+          min_delta: float = 0.001) -> Dict[str, List[float]]:
     """Passes a model through training and testing steps for a specified number of epochs.
 
     Args:
@@ -124,12 +126,18 @@ def train(model: torch.nn.Module,
         optimizer (torch.optim.Optimizer): A PyTorch optimizer to update the model weights.
         device (torch.device): A target device to send the data and model to.
         epochs (int): The number of epochs to train the model for.
+        patience (int): The number of epochs to wait before early stopping.
+        min_delta (float): The minimum change in loss to be considered an improvement.
 
     Returns:
         Dict[str, List[float]]: A dictionary of lists containing the training and testing metrics.
     """
     # Setup a dict to store results
     results = {"train_loss": [], "train_acc": [], "test_loss": [], "test_acc": []}
+    
+    best_test_loss = float("inf")
+    epochs_no_improve = 0
+    best_model_state = None
     
     # Train the model
     for epoch in tqdm(range(epochs)):
@@ -147,6 +155,24 @@ def train(model: torch.nn.Module,
         
         # Print the metrics
         print(f"Epoch: {epoch+1}/{epochs} | Train Loss: {train_loss:.5f} | Train Acc: {train_acc:.5f} | Test Loss: {test_loss:.5f} | Test Acc: {test_acc:.5f}")
+
+        # Check for improvement
+        if test_loss < best_test_loss - min_delta:
+            best_test_loss = test_loss
+            epochs_no_improve = 0
+            best_model_state = model.state_dict()
+        else:
+            epochs_no_improve += 1
+            
+        # Check for early stopping
+        if epochs_no_improve == patience:
+            print(f"Early stopping at epoch {epoch+1}")
+            break
     
+    # Load the best model state
+    if best_model_state is not None:
+        model.load_state_dict(best_model_state)
+        print("Best model state loaded!")
+        
     # Return the results at the end of the epochs
     return results
