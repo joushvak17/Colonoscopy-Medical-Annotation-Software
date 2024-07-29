@@ -29,7 +29,7 @@ def list_models():
     return ", ".join(model_files)
 
 # Create ArgumentParser object
-parser = argparse.ArgumentParser(description="Train a PyTorch model.")
+parser = argparse.ArgumentParser(description="Train a PyTorch multiclassification model on the colonoscopy dataset.")
 
 # Add the arguments
 parser.add_argument("--num_epochs", type=int, default=20, help="Number of epochs to train the model. Default is 20.")
