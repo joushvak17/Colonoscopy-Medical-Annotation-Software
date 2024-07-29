@@ -14,19 +14,21 @@ class VGG19(nn.Module):
             device (_type_, optional): _description_. Defaults to None.
         """
         super().__init__()
-        # TODO: Check to see if this can be removed
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.weights = models.VGG19_Weights.DEFAULT
-        self.model = models.vgg19(weights=self.weights).to(self.device)
+        self.model = models.vgg19(weights=self.weights).to(device)
         
         for param in self.model.parameters():
             param.requires_grad = False
-
-        for param in self.model.features[-5:].parameters():
+        
+        # Unfreeze the last 7 layers
+        for param in self.model.features[-7:].parameters():
             param.requires_grad = True
             
         num_ftrs = self.model.classifier[6].in_features
-        self.model.classifier[6] = nn.Linear(num_ftrs, output_shape).to(self.device)
+        self.model.classifier[6] = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(num_ftrs, output_shape)
+        ).to(device)
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)

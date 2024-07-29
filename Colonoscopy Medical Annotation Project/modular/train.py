@@ -34,12 +34,9 @@ parser = argparse.ArgumentParser(description="Train a PyTorch multiclassificatio
 # Add the arguments
 parser.add_argument("--num_epochs", type=int, default=20, help="Number of epochs to train the model. Default is 20.")
 parser.add_argument("--batch_size", type=int, default=32, help="Number of samples per batch. Default is 32.")
-parser.add_argument("--learning_rate", type=float, default=0.005, help="Learning rate for the optimizer. Default is 0.005.")
+parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate for the optimizer. Default is 0.005.")
 parser.add_argument("--hidden_units", type=int, default=10, help="Number of hidden units in the model. Default is 10. Not needed for transfer learning models.")
-
 parser.add_argument("--model_path", type=str, required=True, help=f"Path to the model file. Argument is required. Available models: {list_models()}")
-# TODO: Check to see if this argument is needed
-# parser.add_argument("--transfer_learning", action="store_true", help="Indicate if the model is a transfer learning model.")
 
 # Parse the arguments
 args = parser.parse_args()
@@ -61,20 +58,44 @@ spec = importlib.util.spec_from_file_location("model_module", model_script_path)
 model_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(model_module)
 
-# Define a function that returns the correct transformation
 def get_transforms(model_name):
     if model_name in TRANSFER_LEARNING_MODELS:
         weights = TRANSFER_LEARNING_MODELS[model_name]
-        transfer_transform = weights.transforms()
-        return transfer_transform
+        base_transform = weights.transforms()
+        
+        # Add data augmentation for training
+        train_transform = transforms.Compose([
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation(10),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+            base_transform
+        ])
+        
+        # Use only the base transform for testing
+        test_transform = base_transform
+        
     else:
-        default_transform = transforms.Compose([transforms.Resize((224, 224)), 
-                                             transforms.ToTensor()])
-        return default_transform
+        # Default transforms if the model is not in TRANSFER_LEARNING_MODELS
+        train_transform = transforms.Compose([
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+        
+        test_transform = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+    
+    return train_transform, test_transform
 
 # Get the transformation based on the model name
 model_name = os.path.basename(args.model_path).replace(".py", "")
-data_transform = get_transforms(model_name)
+train_transform, test_transform = get_transforms(model_name)
 
 model_class = None
 for name, obj in inspect.getmembers(model_module):
@@ -93,22 +114,35 @@ test_dir = "data/testing"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Create the DataLoaders using data_setup.py
-train_loader, test_loader, class_names = data_setup.create_dataloaders(train_dir, 
-                                                                       test_dir, 
-                                                                       data_transform, 
-                                                                       BATCH_SIZE)
+train_loader, test_loader, class_names = data_setup.create_dataloaders(
+    train_dir,
+    test_dir,
+    train_transform,
+    test_transform,
+    BATCH_SIZE
+)
 
 # Create the model
-model = model_class(input_shape=3, 
-                    hidden_units=HIDDEN_UNITS, 
-                    output_shape=len(class_names)).to(device)
+if model_name in TRANSFER_LEARNING_MODELS:
+    model = model_class(output_shape=len(class_names), device=device).to(device)
+else:
+    model = model_class(input_shape=3,
+                        hidden_units=HIDDEN_UNITS,
+                        output_shape=len(class_names)).to(device)
 
 # Set the loss function and optimizer
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9)
+optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=30)
 
 # Start training the model using engine.py
-engine.train(model, train_loader, test_loader, loss_fn, optimizer, device, NUM_EPOCHS)
+from timeit import default_timer as timer
+
+start_timer = timer()
+engine.train(model, train_loader, test_loader, loss_fn, optimizer, scheduler, device, NUM_EPOCHS)
+end_timer = timer()
+
+print(f"Training took: {end_timer - start_timer} seconds")
 
 # Prompt the user to save the model
 save_prompt = input("Do you want to save the model? (yes/no): ").lower()
