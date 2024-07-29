@@ -25,18 +25,20 @@ import data_setup, engine, utils
 def list_models():
     models_dir = os.path.join(script_dir, "models")
     model_files = [f for f in os.listdir(models_dir) if f.endswith(".py")]
+    model_files = ["models/" + f for f in model_files]
     return ", ".join(model_files)
 
 # Create ArgumentParser object
 parser = argparse.ArgumentParser(description="Train a PyTorch model.")
 
 # Add the arguments
-parser.add_argument("--num_epochs", type=int, default=5, help="Number of epochs to train the model.")
-parser.add_argument("--batch_size", type=int, default=32, help="Number of samples per batch.")
-parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate for the optimizer.")
-parser.add_argument("--hidden_units", type=int, default=10, help="Number of hidden units in the model.")
-# FIXME: Need to get rid of the default model path and make it a required argument
-parser.add_argument("--model_path", type=str, default="models/baseline_model.py", help=f"Path to the model file. Available models: {list_models()}")
+parser.add_argument("--num_epochs", type=int, default=20, help="Number of epochs to train the model. Default is 20.")
+parser.add_argument("--batch_size", type=int, default=32, help="Number of samples per batch. Default is 32.")
+parser.add_argument("--learning_rate", type=float, default=0.005, help="Learning rate for the optimizer. Default is 0.005.")
+parser.add_argument("--hidden_units", type=int, required=True, help="Number of hidden units in the model. Argument is required.")
+
+parser.add_argument("--model_path", type=str, required=True, help=f"Path to the model file. Argument is required. Available models: {list_models()}")
+# TODO: Check to see if this argument is needed
 parser.add_argument("--transfer_learning", action="store_true", help="Indicate if the model is a transfer learning model.")
 
 # Parse the arguments
