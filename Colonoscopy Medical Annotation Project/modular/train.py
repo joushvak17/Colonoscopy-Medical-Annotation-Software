@@ -34,7 +34,7 @@ parser = argparse.ArgumentParser(description="Train a PyTorch multiclassificatio
 # Add the arguments
 parser.add_argument("--num_epochs", type=int, default=20, help="Number of epochs to train the model. Default is 20.")
 parser.add_argument("--batch_size", type=int, default=32, help="Number of samples per batch. Default is 32.")
-parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate for the optimizer. Default is 0.005.")
+parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate for the optimizer. Default is 0.001.")
 parser.add_argument("--hidden_units", type=int, default=10, help="Number of hidden units in the model. Default is 10. Not needed for transfer learning models.")
 parser.add_argument("--model_path", type=str, required=True, help=f"Path to the model file. Argument is required. Available models: {list_models()}")
 
