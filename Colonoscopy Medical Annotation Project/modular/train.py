@@ -33,10 +33,13 @@ parser = argparse.ArgumentParser(description="Train a PyTorch multiclassificatio
 
 # Add the arguments
 parser.add_argument("--num_epochs", type=int, default=20, help="Number of epochs to train the model. Default is 20.")
+parser.add_argument("--patience", type=int, default=5, help="Number of epochs to wait before early stopping. Default is 5.")
+parser.add_argument("--min_delta", type=float, default=0.001, help="Minimum change in loss to be considered an improvement. Default is 0.001.")
 parser.add_argument("--batch_size", type=int, default=32, help="Number of samples per batch. Default is 32.")
 parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate for the optimizer. Default is 0.001.")
 parser.add_argument("--hidden_units", type=int, default=10, help="Number of hidden units in the model. Default is 10. Not needed for transfer learning models.")
 parser.add_argument("--model_path", type=str, required=True, help=f"Path to the model file. Argument is required. Available models: {list_models()}")
+
 
 # Parse the arguments
 args = parser.parse_args()
@@ -46,6 +49,8 @@ NUM_EPOCHS = args.num_epochs
 BATCH_SIZE = args.batch_size
 LEARNING_RATE = args.learning_rate
 HIDDEN_UNITS = args.hidden_units
+PATIENCE = args.patience
+MIN_DELTA = args.min_delta
 
 # Define the mapping of model names to their torchvision equivalents and default transformations
 TRANSFER_LEARNING_MODELS = {
@@ -115,11 +120,11 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Create the DataLoaders using data_setup.py
 train_loader, test_loader, class_names = data_setup.create_dataloaders(
-    train_dir,
-    test_dir,
-    train_transform,
-    test_transform,
-    BATCH_SIZE
+    train_dir=train_dir,
+    test_dir=test_dir,
+    train_transform=train_transform,
+    test_transform=test_transform,
+    batch_size=BATCH_SIZE
 )
 
 # Create the model
@@ -132,6 +137,7 @@ else:
 
 # Set the loss function and optimizer
 loss_fn = torch.nn.CrossEntropyLoss()
+# TODO: Figure out optimal optimizer and scheduler to use and the parameters to pass
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=30)
 
@@ -139,7 +145,18 @@ scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=30)
 from timeit import default_timer as timer
 
 start_timer = timer()
-engine.train(model, train_loader, test_loader, loss_fn, optimizer, scheduler, device, NUM_EPOCHS)
+
+engine.train(model=model,
+train_loader=train_loader, 
+test_loader=test_loader, 
+loss_fn=loss_fn, 
+optimizer=optimizer, 
+scheduler=scheduler, 
+device=device, 
+epochs=NUM_EPOCHS,
+patience=PATIENCE,
+min_delta=MIN_DELTA)
+
 end_timer = timer()
 
 print(f"Training took: {end_timer - start_timer} seconds")
