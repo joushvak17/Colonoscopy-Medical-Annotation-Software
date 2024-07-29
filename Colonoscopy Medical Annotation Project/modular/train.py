@@ -103,7 +103,7 @@ model = model_class(input_shape=3,
 
 # Set the loss function and optimizer
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9)
 
 # Start training the model using engine.py
 engine.train(model, train_loader, test_loader, loss_fn, optimizer, device, NUM_EPOCHS)

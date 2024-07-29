@@ -112,6 +112,7 @@ def train(model: torch.nn.Module,
           test_loader: torch.utils.data.DataLoader,
           loss_fn: torch.nn.Module,
           optimizer: torch.optim.Optimizer,
+          scheduler: torch.optim.lr_scheduler._LRScheduler,
           device: torch.device,
           epochs: int,
           patience: int = 5,
@@ -124,6 +125,7 @@ def train(model: torch.nn.Module,
         test_loader (torch.utils.data.DataLoader): A DataLoader object for the testing data.
         loss_fn (torch.nn.Module): A PyTorch loss function to minimize.
         optimizer (torch.optim.Optimizer): A PyTorch optimizer to update the model weights.
+        scheduler (torch.optim.lr_scheduler._LRScheduler): A PyTorch learning rate scheduler.
         device (torch.device): A target device to send the data and model to.
         epochs (int): The number of epochs to train the model for.
         patience (int): The number of epochs to wait before early stopping.
@@ -147,6 +149,9 @@ def train(model: torch.nn.Module,
         # Perform a testing step
         test_loss, test_acc = test_step(model, test_loader, loss_fn, device)
         
+        # Step the scheduler
+        scheduler.step(test_loss)
+
         # Append the metrics to the dict
         results["train_loss"].append(train_loss)
         results["train_acc"].append(train_acc)
@@ -155,6 +160,10 @@ def train(model: torch.nn.Module,
         
         # Print the metrics
         print(f"Epoch: {epoch+1}/{epochs} | Train Loss: {train_loss:.5f} | Train Acc: {train_acc:.5f} | Test Loss: {test_loss:.5f} | Test Acc: {test_acc:.5f}")
+        
+        # Print the current learning rate
+        current_lr = optimizer.param_groups[0]["lr"]
+        print(f"Current Learning Rate: {current_lr}")
 
         # Check for improvement
         if test_loss < best_test_loss - min_delta:
