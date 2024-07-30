@@ -9,14 +9,14 @@ class BaseLine(nn.Module):
         """Defines a simple feedforward neural network for multi-class classification.
 
         Args:
-            input_channels (int): Number of input channels (e.g. 3 for RGB).
-            input_height (int): Height of input image.
-            input_width (int): Width of input image.
+            input_channels (int): Number of input channels (e.g., 3 for RGB).
+            input_height (int): Height of the input images.
+            input_width (int): Width of the input images.
             hidden_units (int): Number of hidden units between layers.
             output_shape (int): Number of output units.
         """
         super().__init__()
-
+        input_shape = input_channels * input_height * input_width
         self.layer_stack = nn.Sequential(
             nn.Flatten(),
             nn.Linear(input_shape, hidden_units),

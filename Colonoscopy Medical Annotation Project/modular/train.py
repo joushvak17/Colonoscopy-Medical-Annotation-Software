@@ -8,9 +8,11 @@ import argparse
 import inspect
 
 import torch
+import torchvision.models as models
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-import torchvision.models as models
+
+from tqdm.auto import tqdm
 
 import importlib.util
 
@@ -133,7 +135,9 @@ train_loader, test_loader, class_names = data_setup.create_dataloaders(
 if model_name in TRANSFER_LEARNING_MODELS:
     model = model_class(output_shape=len(class_names), device=device).to(device)
 else:
-    model = model_class(input_shape=3,
+    model = model_class(input_channels=3,
+                        input_height=224,
+                        input_width=224,
                         hidden_units=HIDDEN_UNITS,
                         output_shape=len(class_names)).to(device)
 
@@ -173,7 +177,7 @@ if validate_prompt == "yes":
     model = model.to(device)
 
     # Create a DataLoader for the validation data
-    validation_dataset = ImageFolder(validation_dir, transform=test_transform)
+    validation_dataset = datasets.ImageFolder(validation_dir, transform=test_transform)
     validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count())
 
     # Iterate through the validation data
