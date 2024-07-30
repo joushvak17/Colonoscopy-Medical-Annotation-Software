@@ -171,7 +171,6 @@ print(f"Training took: {end_timer - start_timer} seconds")
 validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
 if validate_prompt == "yes":
     validation_dir = input("Enter the path to the validation directory: ")
-    # TODO: Implement validation
     # Set the model into evaluation mode
     model.eval()
     model = model.to(device)
