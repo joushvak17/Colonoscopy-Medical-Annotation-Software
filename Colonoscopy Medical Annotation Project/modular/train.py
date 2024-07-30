@@ -8,7 +8,8 @@ import argparse
 import inspect
 
 import torch
-from torchvision import transforms
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
 import torchvision.models as models
 
 import importlib.util
@@ -161,6 +162,37 @@ min_delta=MIN_DELTA)
 end_timer = timer()
 
 print(f"Training took: {end_timer - start_timer} seconds")
+
+# Prompt the user if they want to validate the model
+validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
+if validate_prompt == "yes":
+    validation_dir = input("Enter the path to the validation directory: ")
+    # TODO: Implement validation
+    # Set the model into evaluation mode
+    model.eval()
+    model = model.to(device)
+
+    # Create a DataLoader for the validation data
+    validation_dataset = ImageFolder(validation_dir, transform=test_transform)
+    validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count())
+
+    # Iterate through the validation data
+    correct = 0
+    total = 0
+
+    with torch.no_grad():
+        for images, labels in tqdm(validation_loader):
+            images, labels = images.to(device), labels.to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+    
+    # Calculate the accuracy
+    accuracy = 100 * correct / total
+    print(f"Validation accuracy: {accuracy:.2f}%")
+else:
+    print("Okay model will not be validated.")
 
 # Prompt the user to save the model
 save_prompt = input("Do you want to save the model? (yes/no): ").lower()
