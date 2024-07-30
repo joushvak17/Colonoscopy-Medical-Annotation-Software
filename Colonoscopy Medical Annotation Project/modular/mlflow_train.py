@@ -12,6 +12,9 @@ import torchvision.models as models
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
+import mlflow
+import mlflow.pytorch
+
 from tqdm.auto import tqdm
 
 import importlib.util
@@ -147,60 +150,76 @@ loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=NUM_EPOCHS)
 
-# Start training the model using engine.py
-from timeit import default_timer as timer
+# Start an MLFlow run
+with mlflow.start_run():
+    # Log the hyperparameters
+    mlflow.log_param("num_epochs", NUM_EPOCHS)
+    mlflow.log_param("patience", PATIENCE)
+    mlflow.log_param("min_delta", MIN_DELTA)
+    mlflow.log_param("batch_size", BATCH_SIZE)
+    mlflow.log_param("learning_rate", LEARNING_RATE)
+    mlflow.log_param("weight_decay", WEIGHT_DECAY)
+    mlflow.log_param("hidden_units", HIDDEN_UNITS)
+    mlflow.log_param("model_name", model_name)
 
-start_timer = timer()
+    # Start training the model using engine.py
+    from timeit import default_timer as timer
 
-engine.train(model=model,
-train_loader=train_loader, 
-test_loader=test_loader, 
-loss_fn=loss_fn, 
-optimizer=optimizer, 
-scheduler=scheduler, 
-device=device, 
-epochs=NUM_EPOCHS,
-patience=PATIENCE,
-min_delta=MIN_DELTA)
+    start_timer = timer()
 
-end_timer = timer()
+    engine.train(model=model,
+    train_loader=train_loader, 
+    test_loader=test_loader, 
+    loss_fn=loss_fn, 
+    optimizer=optimizer, 
+    scheduler=scheduler, 
+    device=device, 
+    epochs=NUM_EPOCHS,
+    patience=PATIENCE,
+    min_delta=MIN_DELTA)
 
-print(f"Training took: {end_timer - start_timer} seconds")
+    end_timer = timer()
 
-# Prompt the user if they want to validate the model
-validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
-if validate_prompt == "yes":
-    validation_dir = input("Enter the path to the validation directory: ")
-    # Set the model into evaluation mode
-    model.eval()
-    model = model.to(device)
+    # Log the training duration and print it
+    mlflow.log_metric("training_duration", end_timer - start_timer)
+    print(f"Training took: {end_timer - start_timer} seconds")
 
-    # Create a DataLoader for the validation data
-    validation_dataset = datasets.ImageFolder(validation_dir, transform=test_transform)
-    validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count())
+    # Prompt the user if they want to validate the model
+    validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
+    if validate_prompt == "yes":
+        validation_dir = input("Enter the path to the validation directory: ")
+        # Set the model into evaluation mode
+        model.eval()
+        model = model.to(device)
 
-    # Iterate through the validation data
-    correct = 0
-    total = 0
+        # Create a DataLoader for the validation data
+        validation_dataset = datasets.ImageFolder(validation_dir, transform=test_transform)
+        validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count())
 
-    with torch.no_grad():
-        for images, labels in tqdm(validation_loader):
-            images, labels = images.to(device), labels.to(device)
-            outputs = model(images)
-            _, predicted = torch.max(outputs, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-    
-    # Calculate the accuracy
-    accuracy = 100 * correct / total
-    print(f"Validation accuracy: {accuracy:.2f}%")
-else:
-    print("Okay model will not be validated.")
+        # Iterate through the validation data
+        correct = 0
+        total = 0
 
-# Prompt the user to save the model
-save_prompt = input("Do you want to save the model? (yes/no): ").lower()
-if save_prompt == "yes":
-    model_name = input("Enter the model name (without extension): ")
-    utils.save_model(model, "saved_models", model_name + ".pth")
-else: 
-    print("Okay model will not be saved.")
+        with torch.no_grad():
+            for images, labels in tqdm(validation_loader):
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                _, predicted = torch.max(outputs, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+        
+        # Calculate the accuracy
+        accuracy = 100 * correct / total
+        mlflow.log_metric("validation_accuracy", accuracy)
+        print(f"Validation accuracy: {accuracy:.2f}%")
+    else:
+        print("Okay model will not be validated.")
+
+    # Prompt the user to save the model
+    save_prompt = input("Do you want to save the model? (yes/no): ").lower()
+    if save_prompt == "yes":
+        model_name = input("Enter the model name (without extension): ")
+        utils.save_model(model, "saved_models", model_name + ".pth")
+        mlflow.pytorch.log_model(model, "model")
+    else: 
+        print("Okay model will not be saved.")
