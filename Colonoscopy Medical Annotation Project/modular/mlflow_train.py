@@ -219,7 +219,11 @@ with mlflow.start_run():
     save_prompt = input("Do you want to save the model? (yes/no): ").lower()
     if save_prompt == "yes":
         model_name = input("Enter the model name (without extension): ")
+        # TODO: There might not be any need to save a model if it is being logged to MLFlow
         utils.save_model(model, "saved_models", model_name + ".pth")
+        # FIXME: There is a warning that occurs when saving the model to MLFlow
+        # example_input = torch.randn(1, 3, 224, 224)
+        # Pass that into the log_model with the arg being input_example=example_input
         mlflow.pytorch.log_model(model, "model")
     else: 
         print("Okay model will not be saved.")
