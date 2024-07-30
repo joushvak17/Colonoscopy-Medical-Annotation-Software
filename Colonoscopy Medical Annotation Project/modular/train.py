@@ -37,20 +37,21 @@ parser.add_argument("--patience", type=int, default=5, help="Number of epochs to
 parser.add_argument("--min_delta", type=float, default=0.001, help="Minimum change in loss to be considered an improvement. Default is 0.001.")
 parser.add_argument("--batch_size", type=int, default=32, help="Number of samples per batch. Default is 32.")
 parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate for the optimizer. Default is 0.001.")
+parser.add_argument("--weight_decay", type=float, default=1e-4, help="Weight decay for the optimizer. Default is 0.0001.")
 parser.add_argument("--hidden_units", type=int, default=10, help="Number of hidden units in the model. Default is 10. Not needed for transfer learning models.")
 parser.add_argument("--model_path", type=str, required=True, help=f"Path to the model file. Argument is required. Available models: {list_models()}")
-
 
 # Parse the arguments
 args = parser.parse_args()
 
 # Setup hyperparameters
 NUM_EPOCHS = args.num_epochs
-BATCH_SIZE = args.batch_size
-LEARNING_RATE = args.learning_rate
-HIDDEN_UNITS = args.hidden_units
 PATIENCE = args.patience
 MIN_DELTA = args.min_delta
+BATCH_SIZE = args.batch_size
+LEARNING_RATE = args.learning_rate
+WEIGHT_DECAY = args.weight_decay
+HIDDEN_UNITS = args.hidden_units
 
 # Define the mapping of model names to their torchvision equivalents and default transformations
 TRANSFER_LEARNING_MODELS = {
@@ -138,8 +139,8 @@ else:
 # Set the loss function and optimizer
 loss_fn = torch.nn.CrossEntropyLoss()
 # TODO: Figure out optimal optimizer and scheduler to use and the parameters to pass
-optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
-scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=30)
+optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=NUM_EPOCHS)
 
 # Start training the model using engine.py
 from timeit import default_timer as timer
