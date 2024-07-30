@@ -5,15 +5,18 @@ import torch
 from torch import nn
 
 class BaseLine(nn.Module):
-    def __init__(self, input_shape: int, hidden_units: int, output_shape: int) -> None:
+    def __init__(self, input_channels: int, input_height: int, input_width: int, hidden_units: int, output_shape: int) -> None:
         """Defines a simple feedforward neural network for multi-class classification.
 
         Args:
-            input_shape (int): Number of input channels.
+            input_channels (int): Number of input channels (e.g. 3 for RGB).
+            input_height (int): Height of input image.
+            input_width (int): Width of input image.
             hidden_units (int): Number of hidden units between layers.
             output_shape (int): Number of output units.
         """
         super().__init__()
+
         self.layer_stack = nn.Sequential(
             nn.Flatten(),
             nn.Linear(input_shape, hidden_units),
