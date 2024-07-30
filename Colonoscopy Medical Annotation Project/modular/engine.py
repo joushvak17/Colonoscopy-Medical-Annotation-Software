@@ -150,7 +150,7 @@ def train(model: torch.nn.Module,
         test_loss, test_acc = test_step(model, test_loader, loss_fn, device)
         
         # Step the scheduler
-        scheduler.step(test_loss)
+        scheduler.step()
 
         # Append the metrics to the dict
         results["train_loss"].append(train_loss)
