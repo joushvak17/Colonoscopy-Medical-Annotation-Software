@@ -158,8 +158,8 @@ experiment = mlflow.get_experiment_by_name(experiment_name)
 
 if experiment is None:
     # Create the experiment and set it
-    exp_id = mlflow.create_experiment(experiment_name)
-    mlflow.set_experiment(exp_id)
+    mlflow.create_experiment(experiment_name)
+    mlflow.set_experiment(experiment_name)
 else:
     # Set the experiment
     mlflow.set_experiment(experiment_name)
