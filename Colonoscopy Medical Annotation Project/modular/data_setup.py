@@ -25,7 +25,7 @@ def create_dataloaders(train_dir: str,
         num_workers (int): Number of workers per DataLoader. Currently set to os.cpu_count().
 
     Returns:
-        Tuple: Returns a tuple of (train_loader, test_loader, class_names). Where class_names is a dict of the target classes.
+        Tuple: Returns a tuple of (train_loader, test_loader, class_names).
     """
     # Use ImageFolder to create datasets
     train_data = datasets.ImageFolder(root=train_dir,
