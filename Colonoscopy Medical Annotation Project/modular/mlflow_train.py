@@ -211,7 +211,8 @@ with mlflow.start_run():
 
         # Create a DataLoader for the validation data
         validation_dataset = datasets.ImageFolder(validation_dir, transform=test_transform)
-        validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count())
+        validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False, 
+        num_workers=os.cpu_count())
 
         # Iterate through the validation data
         correct = 0
@@ -231,12 +232,15 @@ with mlflow.start_run():
         print(f"Validation accuracy: {accuracy:.2f}%")
     else:
         print("Okay model will not be validated.")
-
+    
     # Prompt the user to save the model
     save_prompt = input("Do you want to save the model? (yes/no): ").lower()
     if save_prompt == "yes":
         model_name = input("Enter the model name (without extension): ")
-        # FIXME: There is a warning that occurs when saving the model to MLFlow
+        # TODO: There is a warning that occurs when saving the model to MLFlow
+        # It has to do with the model inference signature not being set
+        # https://mlflow.org/docs/latest/model/signatures.html
+        
         # Log the model
         mlflow.pytorch.log_model(model, "model")
     else: 
