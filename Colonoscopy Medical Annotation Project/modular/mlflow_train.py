@@ -150,6 +150,16 @@ loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=NUM_EPOCHS)
 
+# Set the hyperparameters that are to be logged
+params = {"num_epochs": NUM_EPOCHS,
+          "patience": PATIENCE,
+          "min_delta": MIN_DELTA,
+          "batch_size": BATCH_SIZE,
+          "learning_rate": LEARNING_RATE,
+          "weight_decay": WEIGHT_DECAY,
+          "hidden_units": HIDDEN_UNITS,
+          "model_name": model_name}
+
 # Set the experiment name
 experiment_name = f"Colonoscopy Classification [Model: {model_name}]"
 
@@ -167,14 +177,7 @@ else:
 # Start an MLFlow run
 with mlflow.start_run():
     # Log the hyperparameters
-    mlflow.log_param("num_epochs", NUM_EPOCHS)
-    mlflow.log_param("patience", PATIENCE)
-    mlflow.log_param("min_delta", MIN_DELTA)
-    mlflow.log_param("batch_size", BATCH_SIZE)
-    mlflow.log_param("learning_rate", LEARNING_RATE)
-    mlflow.log_param("weight_decay", WEIGHT_DECAY)
-    mlflow.log_param("hidden_units", HIDDEN_UNITS)
-    mlflow.log_param("model_name", model_name)
+    mlflow.log_params(params)
 
     # Start training the model using engine.py
     from timeit import default_timer as timer
