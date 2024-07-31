@@ -150,6 +150,20 @@ loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=NUM_EPOCHS)
 
+# Set the experiment name
+experiment_name = f"Colonoscopy Classification [Model: {model_name}]"
+
+# Check if the experiment exists
+experiment = mlflow.get_experiment_by_name(experiment_name)
+
+if experiment is None:
+    # Create the experiment and set it
+    exp_id = mlflow.create_experiment(experiment_name)
+    mlflow.set_experiment(exp_id)
+else:
+    # Set the experiment
+    mlflow.set_experiment(experiment_name)
+
 # Start an MLFlow run
 with mlflow.start_run():
     # Log the hyperparameters
