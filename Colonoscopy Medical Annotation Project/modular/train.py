@@ -143,7 +143,6 @@ else:
 
 # Set the loss function and optimizer
 loss_fn = torch.nn.CrossEntropyLoss()
-# TODO: Figure out optimal optimizer and scheduler to use and the parameters to pass
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=NUM_EPOCHS)
 
