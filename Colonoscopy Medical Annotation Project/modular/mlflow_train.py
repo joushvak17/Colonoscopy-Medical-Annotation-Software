@@ -150,6 +150,7 @@ loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=NUM_EPOCHS)
 
+# TODO: Setup MLFlow auto logging
 # Set the hyperparameters that are to be logged
 params = {"num_epochs": NUM_EPOCHS,
           "patience": PATIENCE,
@@ -160,6 +161,7 @@ params = {"num_epochs": NUM_EPOCHS,
           "hidden_units": HIDDEN_UNITS,
           "model_name": model_name}
 
+# TODO: Setup the MLFlow tracking URI for the tracking server
 # Set the experiment name
 experiment_name = f"Colonoscopy Classification [Model: {model_name}]"
 
