@@ -165,6 +165,10 @@ params = {"num_epochs": NUM_EPOCHS,
           "model_name": model_name}
 
 # TODO: Setup the MLFlow tracking URI for the tracking server
+
+# Set the tracking URI
+mlflow.set_tracking_uri(uri="http://localhost:5000")
+
 # Set the experiment name
 experiment_name = f"Colonoscopy Classification [Model: {model_name}]"
 
@@ -243,9 +247,6 @@ with mlflow.start_run():
     save_prompt = input("Do you want to save the model? (yes/no): ").lower()
     if save_prompt == "yes":
         model_name = input("Enter the model name (without extension): ")
-        # TODO: There is a warning that occurs when saving the model to MLFlow
-        # It has to do with the model inference signature not being set
-        # https://mlflow.org/docs/latest/model/signatures.html
         
         # Prepare a sample input tensor for the model
         sample_input = torch.randn(1, 3, 224, 224).to(device)
