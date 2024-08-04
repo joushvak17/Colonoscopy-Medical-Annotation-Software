@@ -1,6 +1,6 @@
 <div align="center">
-    <h1>Colonoscopy Medical Annotation Software 💉<h1>
-    <p align="center"><strong>Medical annotation software for colonoscopy images that utilizes C# and deep learning</strong></p>
+  <h1>Colonoscopy Medical Annotation Software 💉</h1>
+  <p align="center"><strong>Medical annotation software for colonoscopy images that utilizes C# and deep learning</strong></p>
 </div>
 
 ## 📑 File Outline 
