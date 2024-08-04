@@ -175,14 +175,11 @@ else:
     # Set the experiment
     mlflow.set_experiment(experiment_name)
 
-# TODO: Setup MLFlow auto logging
-mlflow.pytorch.autolog()
-
 # Start an MLFlow run
 with mlflow.start_run():
-    # FIXME: Check to see if this can be removed if autolog is enabled
+    # TODO: Implement autologging for the model. Currently the PyTorch version is not supported
     # Log the hyperparameters
-    # mlflow.log_params(params)
+    mlflow.log_params(params)
 
     # Start training the model using engine.py
     from timeit import default_timer as timer
