@@ -167,7 +167,7 @@ params = {"num_epochs": NUM_EPOCHS,
 # TODO: Setup the MLFlow tracking URI for the tracking server
 
 # Set the tracking URI
-mlflow.set_tracking_uri(uri="http://localhost:5000")
+mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
 # Set the experiment name
 experiment_name = f"Colonoscopy Classification [Model: {model_name}]"
