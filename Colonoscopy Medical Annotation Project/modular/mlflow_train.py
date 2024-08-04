@@ -1,5 +1,5 @@
 """
-Defines the training script for the PyTorch model.
+Defines the training script for the PyTorch model with MLFlow implementation.
 """
 import os
 
