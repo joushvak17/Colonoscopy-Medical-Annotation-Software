@@ -15,6 +15,8 @@ from torch.utils.data import DataLoader
 import mlflow
 import mlflow.pytorch
 
+import data_setup, engine, utils
+
 from tqdm.auto import tqdm
 
 import importlib.util
@@ -25,7 +27,9 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append("modular")
 sys.path.append("modular/models")
 
-import data_setup, engine, utils
+import warnings
+# Ignore the warnings from setuptools
+warnings.filterwarnings("ignore", message="Setuptools is replacing distutils")
 
 # Function to list available models
 def list_models():
@@ -243,7 +247,19 @@ with mlflow.start_run():
         # It has to do with the model inference signature not being set
         # https://mlflow.org/docs/latest/model/signatures.html
         
+        # Prepare a sample input tensor for the model
+        sample_input = torch.randn(1, 3, 224, 224).to(device)
+
+        # Get the sample output
+        model.eval()
+        with torch.no_grad():
+            sample_output = model(sample_input)
+
+        # Infer the model signature
+        signature = mlflow.models.infer_signature(model_input=sample_input.cpu().numpy(), 
+        model_output=sample_output.cpu().numpy())
+
         # Log the model
-        mlflow.pytorch.log_model(model, "model")
+        mlflow.pytorch.log_model(model, "model", signature=signature)
     else: 
         print("Okay model will not be saved.")
