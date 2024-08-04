@@ -150,7 +150,6 @@ loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=NUM_EPOCHS)
 
-# TODO: Setup MLFlow auto logging
 # Set the hyperparameters that are to be logged
 params = {"num_epochs": NUM_EPOCHS,
           "patience": PATIENCE,
@@ -176,10 +175,14 @@ else:
     # Set the experiment
     mlflow.set_experiment(experiment_name)
 
+# TODO: Setup MLFlow auto logging
+mlflow.pytorch.autolog()
+
 # Start an MLFlow run
 with mlflow.start_run():
+    # FIXME: Check to see if this can be removed if autolog is enabled
     # Log the hyperparameters
-    mlflow.log_params(params)
+    # mlflow.log_params(params)
 
     # Start training the model using engine.py
     from timeit import default_timer as timer
