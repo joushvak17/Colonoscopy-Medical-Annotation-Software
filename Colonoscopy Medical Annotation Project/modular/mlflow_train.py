@@ -164,8 +164,6 @@ params = {"num_epochs": NUM_EPOCHS,
           "hidden_units": HIDDEN_UNITS,
           "model_name": model_name}
 
-# TODO: Setup the MLFlow tracking URI for the tracking server
-
 # Set the tracking URI
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
