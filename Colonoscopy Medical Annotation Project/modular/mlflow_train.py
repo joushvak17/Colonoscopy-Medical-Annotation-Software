@@ -165,7 +165,8 @@ params = {"num_epochs": NUM_EPOCHS,
           "model_name": model_name}
 
 # Set the tracking URI
-# NOTE: Start the tracking server using: mlflow server --host 127.0.0.1 --port 5000
+# NOTE: Start the tracking server using:
+# mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 127.0.0.1 --port 5000
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
 # Set the experiment name
