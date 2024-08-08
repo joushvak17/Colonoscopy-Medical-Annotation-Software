@@ -2,19 +2,12 @@
 Defines the training script for the PyTorch model.
 """
 import os
-
 import argparse
-
 import inspect
-
+import data_setup, engine, utils
+import importlib.util
 import torch
 import torchvision.models as models
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
-
-from tqdm.auto import tqdm
-
-import importlib.util
 
 import sys
 # Adjust the path to include the modular directory and where the scripts are located
@@ -22,7 +15,10 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append("modular")
 sys.path.append("modular/models")
 
-import data_setup, engine, utils
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+from tqdm.auto import tqdm
+from timeit import default_timer as timer
 
 # Function to list available models
 def list_models():
@@ -147,8 +143,6 @@ optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=NUM_EPOCHS)
 
 # Start training the model using engine.py
-from timeit import default_timer as timer
-
 start_timer = timer()
 
 engine.train(model=model,

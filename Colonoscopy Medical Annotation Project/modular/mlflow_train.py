@@ -2,24 +2,14 @@
 Defines the training script for the PyTorch model with MLFlow implementation.
 """
 import os
-
 import argparse
-
 import inspect
-
+import data_setup, engine, utils
+import importlib.util
 import torch
 import torchvision.models as models
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
-
 import mlflow
 import mlflow.pytorch
-
-import data_setup, engine, utils
-
-from tqdm.auto import tqdm
-
-import importlib.util
 
 import sys
 # Adjust the path to include the modular directory and where the scripts are located
@@ -30,6 +20,11 @@ sys.path.append("modular/models")
 import warnings
 # Ignore the warnings from setuptools
 warnings.filterwarnings("ignore", message="Setuptools is replacing distutils")
+
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+from tqdm.auto import tqdm
+from timeit import default_timer as timer
 
 # Function to list available models
 def list_models():
@@ -190,8 +185,6 @@ with mlflow.start_run():
     mlflow.log_params(params)
 
     # Start training the model using engine.py
-    from timeit import default_timer as timer
-
     start_timer = timer()
 
     engine.train(model=model,

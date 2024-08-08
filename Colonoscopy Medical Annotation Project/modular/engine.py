@@ -1,10 +1,8 @@
 """
 Defines functions for training and testing PyTorch models.
 """
-from typing import Tuple, List, Dict
-
 import torch
-
+from typing import Tuple, List, Dict
 from tqdm.auto import tqdm
 
 def train_step(model: torch.nn.Module,
