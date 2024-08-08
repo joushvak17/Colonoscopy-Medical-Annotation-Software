@@ -1,6 +1,9 @@
 data/
 saved_models/
 mlruns/
+
 kaggle.json
-__pycache__/
+mlflow.db
+
+__pycache__
 .vscode
