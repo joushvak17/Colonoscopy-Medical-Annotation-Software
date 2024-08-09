@@ -10,6 +10,7 @@ import torch
 import torchvision.models as models
 import mlflow
 import mlflow.pytorch
+import pandas as pd
 
 import sys
 # Adjust the path to include the modular directory and where the scripts are located
@@ -212,15 +213,16 @@ with mlflow.start_run():
     signature = mlflow.models.infer_signature(model_input=sample_input.cpu().numpy(), 
                                               model_output=sample_output.cpu().numpy())
     mlflow.pytorch.log_model(model, "model", signature=signature)
-    
+
     # Prompt the user to save the model locally
     save_prompt = input("Do you want to save the model locally? (yes/no): ").lower()
     if save_prompt == "yes":
-        # FIXME: Can probaly remove this since the folder will be saved_models
+        # FIXME: Can probably remove this since the folder will be saved_models
         # local_model_path = input("Enter the local path to save the model: ")
         mlflow.pytorch.save_model(model, path="saved_models")
         print(f"Model saved locally at saved_models folder")
     else: 
+        # TODO: Delete the experiment if you do not want to proceed
         print("Okay, the model will not be saved locally.")
 
     # TODO: Implement model evaluation through MlFlow
@@ -244,26 +246,34 @@ with mlflow.start_run():
         # Evaluate the model on the validation dataset
         all_preds = []
         all_labels = []
+        all_probs = []
 
         with torch.no_grad():
             for images, labels in tqdm(validation_loader):
                 images, labels = images.to(device), labels.to(device)
                 outputs = model(images)
+                probs = torch.softmax(outputs, dim=1)
                 _, preds = torch.max(outputs, 1)
                 all_preds.extend(preds.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
+                all_probs.extend(probs.cpu().numpy())
 
         # Calculate metrics
-        roc_auc = roc_auc_score(all_labels, all_preds, multi_class='ovr')
-        logloss = log_loss(all_labels, all_preds)
+        roc_auc = roc_auc_score(all_labels, all_probs, multi_class='ovr')
+        logloss = log_loss(all_labels, all_probs)
         class_report = classification_report(all_labels, all_preds, output_dict=True)
         conf_matrix = confusion_matrix(all_labels, all_preds)
+
+        # Save confusion matrix to a CSV file
+        conf_matrix_df = pd.DataFrame(conf_matrix)
+        conf_matrix_file = "confusion_matrix.csv"
+        conf_matrix_df.to_csv(conf_matrix_file, index=False)
 
         # Log metrics with mlflow
         mlflow.log_metric("roc_auc", roc_auc)
         mlflow.log_metric("log_loss", logloss)
         mlflow.log_dict(class_report, "classification_report.json")
-        mlflow.log_artifact(conf_matrix, "confusion_matrix")
+        mlflow.log_artifact(conf_matrix_file, "confusion_matrix")
 
         print(f"ROC AUC: {roc_auc}")
         print(f"Log Loss: {logloss}")
