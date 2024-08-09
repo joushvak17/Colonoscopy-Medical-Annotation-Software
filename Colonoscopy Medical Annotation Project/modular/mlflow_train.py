@@ -217,8 +217,6 @@ with mlflow.start_run():
     # Prompt the user to save the model locally
     save_prompt = input("Do you want to save the model locally? (yes/no): ").lower()
     if save_prompt == "yes":
-        # FIXME: Can probably remove this since the folder will be saved_models
-        # local_model_path = input("Enter the local path to save the model: ")
         local_model_path = input("Enter the name of the folder you want to create to save the model: ")
         if os.path.exists("saved_models/" + local_model_path):
             print(f"Folder {local_model_path} already exists. Please choose another name.")
