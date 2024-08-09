@@ -219,12 +219,12 @@ with mlflow.start_run():
     if save_prompt == "yes":
         local_model_path = input("Enter the name of the folder you want to create to save the model: ")
         if os.path.exists("saved_models/" + local_model_path):
-            print(f"Folder {local_model_path} already exists. Please choose another name.")
+            print(f"Folder {"saved_models/" + local_model_path} already exists. Please choose another name.")
             exit(1)
         else:
             os.makedirs("saved_models/" + local_model_path)
             mlflow.pytorch.save_model(model, path="saved_models/" + local_model_path)
-            print(f"Model saved locally at {local_model_path} folder")
+            print(f"Model saved locally at {"saved_models/" + local_model_path} folder")
     else: 
         # TODO: Delete the experiment if you do not want to proceed
         print("Okay, the model will not be saved locally.")
