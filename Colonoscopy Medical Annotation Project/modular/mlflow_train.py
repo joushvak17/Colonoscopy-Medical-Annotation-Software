@@ -120,8 +120,8 @@ if model_class is None:
     raise ValueError(f"Model class not found in {model_script_path}")
 
 # Setup the directories
-train_dir = "data/training"
-test_dir = "data/testing"
+train_dir = "Colonoscopy Medical Annotation Project/data/training"
+test_dir = "Colonoscopy Medical Annotation Project/data/testing"
 
 # Setup target device
 device = "cuda" if torch.cuda.is_available() else "cpu"
