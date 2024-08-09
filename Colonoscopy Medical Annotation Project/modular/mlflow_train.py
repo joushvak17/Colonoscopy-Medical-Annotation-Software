@@ -25,6 +25,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from timeit import default_timer as timer
+from sklearn.metrics import classification_report, confusion_matrix
 
 # Function to list available models
 def list_models():
@@ -156,8 +157,7 @@ params = {"num_epochs": NUM_EPOCHS,
           "batch_size": BATCH_SIZE,
           "learning_rate": LEARNING_RATE,
           "weight_decay": WEIGHT_DECAY,
-          "hidden_units": HIDDEN_UNITS,
-          "model_name": model_name}
+          "hidden_units": HIDDEN_UNITS}
 
 # Set the tracking URI
 # NOTE: Start the tracking server using:
@@ -204,6 +204,26 @@ with mlflow.start_run():
     mlflow.log_metric("training_duration", end_timer - start_timer)
     print(f"Training took: {end_timer - start_timer} seconds")
 
+    # Log the model to MLflow
+    sample_input = torch.randn(1, 3, 224, 224).to(device)
+    model.eval()
+    with torch.no_grad():
+        sample_output = model(sample_input)
+    signature = mlflow.models.infer_signature(model_input=sample_input.cpu().numpy(), 
+                                              model_output=sample_output.cpu().numpy())
+    mlflow.pytorch.log_model(model, "model", signature=signature)
+
+    # Prompt the user to save the model locally
+    save_prompt = input("Do you want to save the model locally? (yes/no): ").lower()
+    if save_prompt == "yes":
+        # FIXME: Can probaly remove this since the folder will be saved_models
+        # local_model_path = input("Enter the local path to save the model: ")
+        mlflow.pytorch.save_model(model, path="saved_models")
+        print(f"Model saved locally at {local_model_path}")
+    else: 
+        print("Okay, the model will not be saved locally.")
+
+    # TODO: Implement model evaluation through MlFlow
     # Prompt the user if they want to validate the model
     validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
     if validate_prompt == "yes":
@@ -235,25 +255,3 @@ with mlflow.start_run():
         print(f"Validation accuracy: {accuracy:.2f}%")
     else:
         print("Okay model will not be validated.")
-    
-    # Prompt the user to save the model
-    save_prompt = input("Do you want to save the model? (yes/no): ").lower()
-    if save_prompt == "yes":
-        model_name = input("Enter the model name (without extension): ")
-        
-        # Prepare a sample input tensor for the model
-        sample_input = torch.randn(1, 3, 224, 224).to(device)
-
-        # Get the sample output
-        model.eval()
-        with torch.no_grad():
-            sample_output = model(sample_input)
-
-        # Infer the model signature
-        signature = mlflow.models.infer_signature(model_input=sample_input.cpu().numpy(), 
-        model_output=sample_output.cpu().numpy())
-
-        # Log the model
-        mlflow.pytorch.log_model(model, "model", signature=signature)
-    else: 
-        print("Okay model will not be saved.")
