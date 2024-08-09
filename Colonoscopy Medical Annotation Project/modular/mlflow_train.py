@@ -212,7 +212,7 @@ with mlflow.start_run():
     signature = mlflow.models.infer_signature(model_input=sample_input.cpu().numpy(), 
                                               model_output=sample_output.cpu().numpy())
     mlflow.pytorch.log_model(model, "model", signature=signature)
-
+    
     # Prompt the user to save the model locally
     save_prompt = input("Do you want to save the model locally? (yes/no): ").lower()
     if save_prompt == "yes":
