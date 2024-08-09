@@ -219,7 +219,7 @@ with mlflow.start_run():
         # FIXME: Can probaly remove this since the folder will be saved_models
         # local_model_path = input("Enter the local path to save the model: ")
         mlflow.pytorch.save_model(model, path="saved_models")
-        print(f"Model saved locally at {local_model_path}")
+        print(f"Model saved locally at saved_models folder")
     else: 
         print("Okay, the model will not be saved locally.")
 
