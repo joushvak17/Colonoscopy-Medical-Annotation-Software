@@ -205,23 +205,25 @@ with mlflow.start_run():
     mlflow.log_metric("training_duration", end_timer - start_timer)
     print(f"Training took: {end_timer - start_timer} seconds")
 
-    # Log the model to MLflow
-    sample_input = torch.randn(1, 3, 224, 224).to(device)
-    model.eval()
-    with torch.no_grad():
-        sample_output = model(sample_input)
-    signature = mlflow.models.infer_signature(model_input=sample_input.cpu().numpy(), 
-                                              model_output=sample_output.cpu().numpy())
-    mlflow.pytorch.log_model(model, "model", signature=signature)
-
     # Prompt the user to save the model locally
-    save_prompt = input("Do you want to save the model locally? (yes/no): ").lower()
+    save_prompt = input("Do you want to save and log the model locally? (yes/no): ").lower()
     if save_prompt == "yes":
         local_model_path = input("Enter the name of the folder you want to create to save the model: ")
+        # Check if the folder already exists, if not create it
         if os.path.exists("saved_models/" + local_model_path):
             print(f"Folder {"saved_models/" + local_model_path} already exists. Please choose another name.")
             exit(1)
         else:
+            # Log the model to MLflow
+            sample_input = torch.randn(1, 3, 224, 224).to(device)
+            model.eval()
+            with torch.no_grad():
+                sample_output = model(sample_input)
+            signature = mlflow.models.infer_signature(model_input=sample_input.cpu().numpy(), 
+                                                      model_output=sample_output.cpu().numpy())
+            mlflow.pytorch.log_model(model, "model", signature=signature)
+
+            # Save the model locally
             os.makedirs("saved_models/" + local_model_path)
             mlflow.pytorch.save_model(model, path="saved_models/" + local_model_path)
             print(f"Model saved locally at {"saved_models/" + local_model_path} folder")
