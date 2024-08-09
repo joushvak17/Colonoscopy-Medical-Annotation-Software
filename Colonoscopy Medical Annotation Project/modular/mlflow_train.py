@@ -25,7 +25,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from timeit import default_timer as timer
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score, log_loss
 
 # Function to list available models
 def list_models():
@@ -228,30 +228,46 @@ with mlflow.start_run():
     validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
     if validate_prompt == "yes":
         validation_dir = input("Enter the path to the validation directory: ")
-        # Set the model into evaluation mode
-        model.eval()
+        # Load the model from MLflow
+        model_uri = f"runs:/{mlflow.active_run().info.run_id}/model"
+        model = mlflow.pytorch.load_model(model_uri)
         model = model.to(device)
+        
+        # Set the model to inference mode
+        model.eval()
 
         # Create a DataLoader for the validation data
         validation_dataset = datasets.ImageFolder(validation_dir, transform=test_transform)
         validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False, 
-        num_workers=os.cpu_count())
+                                       num_workers=os.cpu_count())
 
-        # Iterate through the validation data
-        correct = 0
-        total = 0
+        # Evaluate the model on the validation dataset
+        all_preds = []
+        all_labels = []
 
         with torch.no_grad():
             for images, labels in tqdm(validation_loader):
                 images, labels = images.to(device), labels.to(device)
                 outputs = model(images)
-                _, predicted = torch.max(outputs, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-        
-        # Calculate the accuracy
-        accuracy = 100 * correct / total
-        mlflow.log_metric("validation_accuracy", accuracy)
-        print(f"Validation accuracy: {accuracy:.2f}%")
+                _, preds = torch.max(outputs, 1)
+                all_preds.extend(preds.cpu().numpy())
+                all_labels.extend(labels.cpu().numpy())
+
+        # Calculate metrics
+        roc_auc = roc_auc_score(all_labels, all_preds, multi_class='ovr')
+        logloss = log_loss(all_labels, all_preds)
+        class_report = classification_report(all_labels, all_preds, output_dict=True)
+        conf_matrix = confusion_matrix(all_labels, all_preds)
+
+        # Log metrics with mlflow
+        mlflow.log_metric("roc_auc", roc_auc)
+        mlflow.log_metric("log_loss", logloss)
+        mlflow.log_dict(class_report, "classification_report.json")
+        mlflow.log_artifact(conf_matrix, "confusion_matrix")
+
+        print(f"ROC AUC: {roc_auc}")
+        print(f"Log Loss: {logloss}")
+        print(f"Classification Report:\n{classification_report(all_labels, all_preds)}")
+        print(f"Confusion Matrix:\n{conf_matrix}")
     else:
-        print("Okay model will not be validated.")
+        print("Okay, the model will not be validated.")
