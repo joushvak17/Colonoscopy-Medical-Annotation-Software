@@ -4,7 +4,7 @@ Defines the training script for the PyTorch model with MLFlow implementation.
 import os
 import argparse
 import inspect
-import data_setup, engine, utils
+import data_setup, engine
 import importlib.util
 import torch
 import torchvision.models as models
