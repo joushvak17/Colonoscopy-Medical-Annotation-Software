@@ -11,6 +11,7 @@ import torchvision.models as models
 import mlflow
 import mlflow.pytorch
 import pandas as pd
+import numpy as np
 
 import sys
 # Adjust the path to include the modular directory and where the scripts are located
@@ -267,7 +268,8 @@ with mlflow.start_run():
         # Calculate metrics
         roc_auc = roc_auc_score(all_labels, all_probs, multi_class='ovr')
         logloss = log_loss(all_labels, all_probs)
-        class_report = classification_report(all_labels, all_preds, output_dict=True)
+        class_report = classification_report(all_labels, np.argmax(all_probs, axis=1), 
+                                             output_dict=True)
         conf_matrix = confusion_matrix(all_labels, all_preds)
 
         # Save confusion matrix to a CSV file
