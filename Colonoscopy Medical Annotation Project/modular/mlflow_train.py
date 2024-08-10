@@ -186,6 +186,8 @@ with mlflow.start_run():
     # Log the hyperparameters
     mlflow.log_params(params)
 
+    # TODO: One thing that can be implemented is to log the model architecture
+
     # Start training the model using engine.py
     start_timer = timer()
 
@@ -210,9 +212,10 @@ with mlflow.start_run():
     save_prompt = input("Do you want to save and log the model locally? (yes/no): ").lower()
     if save_prompt == "yes":
         local_model_path = input("Enter the name of the folder you want to create to save the model: ")
+        full_path = "saved_models/" + local_model_path
         # Check if the folder already exists, if not create it
-        if os.path.exists("saved_models/" + local_model_path):
-            print(f"Folder {"saved_models/" + local_model_path} already exists. Please choose another name.")
+        if os.path.exists(full_path):
+            print(f"Folder {full_path} already exists. Please choose another name.")
             exit(1)
         else:
             # Log the model to MLflow
@@ -225,9 +228,9 @@ with mlflow.start_run():
             mlflow.pytorch.log_model(model, "model", signature=signature)
 
             # Save the model locally
-            os.makedirs("saved_models/" + local_model_path)
-            mlflow.pytorch.save_model(model, path="saved_models/" + local_model_path)
-            print(f"Model saved locally at {"saved_models/" + local_model_path} folder")
+            os.makedirs(full_path, exist_ok=True)
+            mlflow.pytorch.save_model(model, path=full_path)
+            print(f"Model saved locally at {full_path} folder")
     else: 
         # TODO: Delete the experiment if you do not want to proceed
         print("Okay, the model will not be saved locally.")
