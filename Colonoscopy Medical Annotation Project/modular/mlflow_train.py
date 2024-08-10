@@ -286,6 +286,5 @@ with mlflow.start_run():
         print(f"ROC AUC: {roc_auc}")
         print(f"Log Loss: {logloss}")
         print(f"Classification Report:\n{classification_report(all_labels, all_preds)}")
-        print(f"Confusion Matrix:\n{conf_matrix}")
     else:
         print("Okay, the model will not be validated.")
