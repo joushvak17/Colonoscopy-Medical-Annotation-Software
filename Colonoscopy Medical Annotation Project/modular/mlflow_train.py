@@ -27,7 +27,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from timeit import default_timer as timer
-from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score, log_loss
+from sklearn.metrics import classification_report, roc_auc_score, log_loss
 
 # Function to list available models
 def list_models():
@@ -273,18 +273,11 @@ with mlflow.start_run():
         logloss = log_loss(all_labels, all_probs)
         class_report = classification_report(all_labels, np.argmax(all_probs, axis=1), 
                                              output_dict=True)
-        conf_matrix = confusion_matrix(all_labels, all_preds)
-
-        # Save confusion matrix to a CSV file
-        conf_matrix_df = pd.DataFrame(conf_matrix)
-        conf_matrix_file = "confusion_matrix.csv"
-        conf_matrix_df.to_csv(conf_matrix_file, index=False)
 
         # Log metrics with mlflow
         mlflow.log_metric("roc_auc", roc_auc)
         mlflow.log_metric("log_loss", logloss)
         mlflow.log_dict(class_report, "classification_report.json")
-        mlflow.log_artifact(conf_matrix_file, "confusion_matrix")
 
         print(f"ROC AUC: {roc_auc}")
         print(f"Log Loss: {logloss}")
