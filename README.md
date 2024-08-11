@@ -5,10 +5,6 @@
 
 ## 📑 File Outline 
 
-### [Colonoscopy Medical Annotation Project](https://github.com/joushvak17/Colonoscopy-Medical-Annotation-Software/tree/master/Colonoscopy%20Medical%20Annotation%20Project)
-- Models.ipynb: Notebook that creates Python scipts for the models
-- Run.ipynb: Notebook that creates Python scripts for the deep learning workflow
-
 ### [Colonoscopy Medical Annotation Project/modular](https://github.com/joushvak17/Colonoscopy-Medical-Annotation-Software/tree/master/Colonoscopy%20Medical%20Annotation%20Project/modular)
 - data_setup.py: Defines the functionality for creating PyTorch dataloaders for the multi-class classification dataset
 - engine.py: Defines functions for training and testing PyTorch models
