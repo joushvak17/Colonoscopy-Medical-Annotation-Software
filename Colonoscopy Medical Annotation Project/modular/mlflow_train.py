@@ -182,6 +182,9 @@ else:
 
 # Start an MLFlow run
 with mlflow.start_run():
+    # Get the run ID
+    run_id = mlflow.active_run().info.run_id
+
     # TODO: Implement autologging for the model. Currently the PyTorch version is not supported
     # Log the hyperparameters
     mlflow.log_params(params)
@@ -232,7 +235,7 @@ with mlflow.start_run():
             mlflow.pytorch.save_model(model, path=full_path)
             print(f"Model saved locally at {full_path} folder")
     else: 
-        # TODO: Delete the experiment if you do not want to proceed
+        mlflow.delete_run(run_id)
         print("Okay, the model will not be saved locally.")
 
     # TODO: Implement model evaluation through MlFlow
