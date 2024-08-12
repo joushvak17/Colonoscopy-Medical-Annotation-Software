@@ -24,6 +24,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Setuptools is replacing distutils")
 
 from torchvision import datasets, transforms
+from torchsummary import summary
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from timeit import default_timer as timer
@@ -188,7 +189,11 @@ with mlflow.start_run():
     # Log the hyperparameters
     mlflow.log_params(params)
 
-    # TODO: One thing that can be implemented is to log the model architecture
+    model_summary = summary(model, input_size=(3, 224, 224), device=device)
+    summary_str = str(model_summary)
+    with open("model_summary.txt", "w") as f:
+        f.write(summary_str)
+    mlflow.log_artifact("model_summary.txt")
 
     # Start training the model using engine.py
     start_timer = timer()
