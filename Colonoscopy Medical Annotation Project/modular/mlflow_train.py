@@ -10,7 +10,6 @@ import torch
 import torchvision.models as models
 import mlflow
 import mlflow.pytorch
-import pandas as pd
 import numpy as np
 
 import sys
