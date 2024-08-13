@@ -184,7 +184,7 @@ with mlflow.start_run():
     # Get the run ID
     run_id = mlflow.active_run().info.run_id
 
-    # TODO: Implement autologging for the model. Currently the PyTorch version is not supported
+    # NOTE: Implement autologging for the model. Currently the PyTorch version is not supported
     # Log the hyperparameters
     mlflow.log_params(params)
 
@@ -241,7 +241,6 @@ with mlflow.start_run():
         mlflow.delete_run(run_id)
         print("Okay, the model will not be saved locally.")
 
-    # TODO: Implement model evaluation through MlFlow
     # Prompt the user if they want to validate the model
     validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
     if validate_prompt == "yes":
@@ -283,10 +282,15 @@ with mlflow.start_run():
         # Log metrics with mlflow
         mlflow.log_metric("roc_auc", roc_auc)
         mlflow.log_metric("log_loss", logloss)
-        mlflow.log_dict(class_report, "classification_report.json")
 
-        print(f"ROC AUC: {roc_auc}")
-        print(f"Log Loss: {logloss}")
-        print(f"Classification Report:\n{classification_report(all_labels, all_preds)}")
+        # Log the individual class metrics from the classification report
+        for label, metrics in class_report.items():
+            if isinstance(metrics, dict):
+                for metric, value in metrics.items():
+                    mlflow.log_metric(f"{label}_{metric}", value)  
+            else:
+                mlflow.log_metric(label, metrics)
+
+        # mlflow.log_dict(class_report, "classification_report.json")
     else:
         print("Okay, the model will not be validated.")
