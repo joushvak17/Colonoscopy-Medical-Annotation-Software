@@ -1,12 +1,10 @@
+trash/
 data/
 saved_models/
 mlruns/
 
 kaggle.json
 mlflow.db
-confusion_matrix.csv
-Run.ipynb
-Models.ipynb
 
 __pycache__
 .vscode
