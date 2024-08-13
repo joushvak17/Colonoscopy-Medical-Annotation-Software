@@ -1,4 +1,4 @@
-name: ThirdProject
+name: Colonoscopy Medical Annotation Project
 channels:
   - pytorch
   - nvidia
