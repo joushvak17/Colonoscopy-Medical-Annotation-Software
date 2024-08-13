@@ -166,7 +166,7 @@ params = {"num_epochs": NUM_EPOCHS,
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
 # Set the experiment name
-experiment_name = f"Colonoscopy Classification [Model: {model_name}]"
+experiment_name = f"MC Classification [Model: {model_name}]"
 
 # Check if the experiment exists
 experiment = mlflow.get_experiment_by_name(experiment_name)
