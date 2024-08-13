@@ -232,4 +232,3 @@ dependencies:
       - webencodings==0.5.1
       - werkzeug==3.0.3
       - wrapt==1.16.0
-prefix: /home/jjk339/miniconda3/envs/ThirdProject
