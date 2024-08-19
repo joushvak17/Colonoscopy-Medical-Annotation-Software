@@ -25,7 +25,7 @@ def train_step(model: torch.nn.Module,
     # Put the model in training mode
     model.train()
     
-    #Setup the loss and accuracy
+    # Setup the loss and accuracy
     train_loss, train_acc = 0, 0
     
     # Iterate over the data
@@ -34,9 +34,6 @@ def train_step(model: torch.nn.Module,
         X, y = X.to(device), y.to(device)
         
         # Forward pass
-        y_pred = model(X)
-        
-        # Get the predictions
         y_pred = model(X)
         
         # Calculate the loss
