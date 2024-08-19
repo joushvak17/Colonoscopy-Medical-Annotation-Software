@@ -29,7 +29,7 @@ def train_step(model: torch.nn.Module,
     train_loss, train_acc = 0, 0
     
     # Iterate over the data
-    for batch, (X, y) in enumerate(dataloader):
+    for X, y in enumerate(dataloader):
         # Send the data to the device
         X, y = X.to(device), y.to(device)
         
@@ -82,7 +82,7 @@ def test_step(model: torch.nn.Module,
     # Turn on inference mode
     with torch.inference_mode():
         # Iterate over the data
-        for batch, (X, y) in enumerate(dataloader):
+        for X, y in enumerate(dataloader):
             # Send the data to the device
             X, y = X.to(device), y.to(device)
         
