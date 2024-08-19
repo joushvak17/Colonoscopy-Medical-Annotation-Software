@@ -1,9 +1,12 @@
+# Folders
 data/
 saved_models/
 mlruns/
 
+# Files
 kaggle.json
 mlflow.db
 
+# Misc
 __pycache__
 .vscode
