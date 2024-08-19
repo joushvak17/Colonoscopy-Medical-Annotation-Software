@@ -19,8 +19,12 @@ class EfficientNetB3(nn.Module):
         
         for param in self.model.parameters():
             param.requires_grad = False
+
+        # Unfreeze the last 7 layers
+        for param in self.model.features[-7:].parameters():
+            param.requires_grad = True
         
-        num_ftrs = self.model.classifier.in_features
+        num_ftrs = self.model.classifier[1].in_features
         self.model.classifier = nn.Sequential(
             nn.Dropout(0.5),
             nn.Linear(num_ftrs, output_shape)
