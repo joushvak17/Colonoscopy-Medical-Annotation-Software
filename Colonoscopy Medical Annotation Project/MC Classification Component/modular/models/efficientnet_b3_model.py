@@ -14,7 +14,7 @@ class EfficientNetB3(nn.Module):
             device (_type_, optional): _description_. Defaults to None.
         """
         super().__init__()
-        self.weights = models.EfficientNetB3_Weights.DEFAULT
+        self.weights = models.EfficientNet_B3_Weights.DEFAULT
         self.model = models.efficientnet_b3(weights=self.weights).to(device)
         
         for param in self.model.parameters():
