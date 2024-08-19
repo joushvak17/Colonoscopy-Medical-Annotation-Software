@@ -3,16 +3,18 @@ import shutil
 import opendatasets as od
 from sklearn.model_selection import train_test_split
 
-# Download the dataset
+# Download the dataset for the multi-class classification component
 od.download("https://www.kaggle.com/datasets/yasserhessein/the-kvasir-dataset")
 
-# Define the paths for source, training, testing, and validation
+# Define the source path where the dataset is downloaded
 source_path = "the-kvasir-dataset/kvasir-dataset-v2"
+
+# Define the paths for training, testing, and validation
 train_path = "data/training"
 test_path = "data/testing"
 validation_path = "data/validation"
 
-# Define the split ratios
+# Define the standard split ratios for training, testing, and validation
 train_ratio = 0.7
 test_ratio = 0.2
 validation_ratio = 0.1
