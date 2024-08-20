@@ -25,14 +25,15 @@ def save_model(model: torch.nn.Module,
     print(f"Saving model to: {model_save_path}")
     torch.save(model.state_dict(), model_save_path)
 
-def get_model_size(model: torch.nn.Module) -> int:
-    """Calculate the size of a PyTorch model in bytes.
+def get_model_size_in_mb(model: torch.nn.Module) -> float:
+    """Calculate the size of a PyTorch model in megabytes (MB) in decimal format.
 
     Args:
         model (torch.nn.Module): A PyTorch model.
 
     Returns:
-        int: The size of the model in bytes.
+        float: The size of the model in megabytes.
     """
-    model_size = sum(p.numel() * p.element_size() for p in model.parameters())
-    return model_size
+    model_size_bytes = sum(p.numel() * p.element_size() for p in model.parameters())
+    model_size_mb = model_size_bytes / 1_000_000
+    return model_size_mb
