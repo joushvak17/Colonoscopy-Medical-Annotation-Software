@@ -220,6 +220,7 @@ with mlflow.start_run():
         local_model_path = input("Enter the name of the folder you want to create to save the model: ")
         full_path = "saved_models/" + local_model_path
         # Check if the folder already exists, if not create it
+        # FIXME: Check to see if new folder name can be given if it already exists
         if os.path.exists(full_path):
             print(f"Folder {full_path} already exists. Please choose another name.")
             exit(1)
@@ -237,65 +238,65 @@ with mlflow.start_run():
             os.makedirs(full_path, exist_ok=True)
             mlflow.pytorch.save_model(model, path=full_path)
             print(f"Model saved locally at {full_path} folder")
+    
+        # Prompt the user if they want to validate the model
+        validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
+        if validate_prompt == "yes":
+            validation_dir = input("Enter the path to the validation directory: ")
+            # Load the model from MLflow
+            model_uri = f"runs:/{mlflow.active_run().info.run_id}/model"
+            model = mlflow.pytorch.load_model(model_uri)
+            model = model.to(device)
+            
+            # Set the model to inference mode
+            model.eval()
+
+            # Create a DataLoader for the validation data
+            validation_dataset = datasets.ImageFolder(validation_dir, transform=test_transform)
+            validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False, 
+                                        num_workers=os.cpu_count())
+
+            # Evaluate the model on the validation dataset
+            all_preds = []
+            all_labels = []
+            all_probs = []
+
+            with torch.no_grad():
+                for images, labels in tqdm(validation_loader):
+                    images, labels = images.to(device), labels.to(device)
+                    outputs = model(images)
+                    probs = torch.softmax(outputs, dim=1)
+                    _, preds = torch.max(outputs, 1)
+                    all_preds.extend(preds.cpu().numpy())
+                    all_labels.extend(labels.cpu().numpy())
+                    all_probs.extend(probs.cpu().numpy())
+
+            # Convert lists to numpy arrays
+            all_labels = np.array(all_labels)
+            all_probs = np.array(all_probs)
+
+            # Calculate metrics
+            roc_auc = roc_auc_score(all_labels, all_probs, multi_class='ovr')
+            logloss = log_loss(all_labels, all_probs)
+            predicted_labels = np.argmax(all_probs, axis=1)
+            class_report = classification_report(all_labels, predicted_labels, output_dict=True, zero_division=0)
+
+            # Log metrics with MLflow
+            mlflow.log_metric("roc_auc", roc_auc)
+            mlflow.log_metric("log_loss", logloss)
+
+            # Log the individual class metrics from the classification report
+            for label, metrics in class_report.items():
+                if isinstance(metrics, dict):
+                    for metric, value in metrics.items():
+                        mlflow.log_metric(f"{label}_{metric}", value)  
+                else:
+                    mlflow.log_metric(label, metrics)
+
+            # TODO: Optionally, log the classification report as a JSON file
+            # mlflow.log_dict(class_report, "classification_report.json")
+        else:
+            print("Okay, the model will not be validated.")
     else: 
         mlflow.delete_run(run_id)
-        print("Okay, the model will not be saved locally.")
-
-    # Prompt the user if they want to validate the model
-    validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
-    if validate_prompt == "yes":
-        validation_dir = input("Enter the path to the validation directory: ")
-        # Load the model from MLflow
-        model_uri = f"runs:/{mlflow.active_run().info.run_id}/model"
-        model = mlflow.pytorch.load_model(model_uri)
-        model = model.to(device)
-        
-        # Set the model to inference mode
-        model.eval()
-
-        # Create a DataLoader for the validation data
-        validation_dataset = datasets.ImageFolder(validation_dir, transform=test_transform)
-        validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False, 
-                                       num_workers=os.cpu_count())
-
-        # Evaluate the model on the validation dataset
-        all_preds = []
-        all_labels = []
-        all_probs = []
-
-        with torch.no_grad():
-            for images, labels in tqdm(validation_loader):
-                images, labels = images.to(device), labels.to(device)
-                outputs = model(images)
-                probs = torch.softmax(outputs, dim=1)
-                _, preds = torch.max(outputs, 1)
-                all_preds.extend(preds.cpu().numpy())
-                all_labels.extend(labels.cpu().numpy())
-                all_probs.extend(probs.cpu().numpy())
-
-        # Convert lists to numpy arrays
-        all_labels = np.array(all_labels)
-        all_probs = np.array(all_probs)
-
-        # Calculate metrics
-        roc_auc = roc_auc_score(all_labels, all_probs, multi_class='ovr')
-        logloss = log_loss(all_labels, all_probs)
-        predicted_labels = np.argmax(all_probs, axis=1)
-        class_report = classification_report(all_labels, predicted_labels, output_dict=True, zero_division=0)
-
-        # Log metrics with MLflow
-        mlflow.log_metric("roc_auc", roc_auc)
-        mlflow.log_metric("log_loss", logloss)
-
-        # Log the individual class metrics from the classification report
-        for label, metrics in class_report.items():
-            if isinstance(metrics, dict):
-                for metric, value in metrics.items():
-                    mlflow.log_metric(f"{label}_{metric}", value)  
-            else:
-                mlflow.log_metric(label, metrics)
-
-        # TODO: Optionally, log the classification report as a JSON file
-        # mlflow.log_dict(class_report, "classification_report.json")
-    else:
-        print("Okay, the model will not be validated.")
+        print("Okay, the model will not be saved nor logged locally.")
