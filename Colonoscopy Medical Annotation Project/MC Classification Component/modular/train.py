@@ -23,7 +23,6 @@ import warnings
 warnings.filterwarnings("ignore", message="Setuptools is replacing distutils")
 
 from torchvision import datasets, transforms
-from torchsummary import summary
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from timeit import default_timer as timer
