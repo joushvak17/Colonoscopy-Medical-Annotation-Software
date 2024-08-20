@@ -64,7 +64,7 @@ HIDDEN_UNITS = args.hidden_units
 TRANSFER_LEARNING_MODELS = {
     "vgg19_model": models.VGG19_Weights.DEFAULT,
     "efficientnet_b3_model": models.EfficientNet_B3_Weights.DEFAULT,
-    "mobilenet_v2_model": models.MobileNet_V2_Weights.DEFAULT
+    "mobilenetv2_model": models.MobileNet_V2_Weights.DEFAULT
 }
 
 # Import the specified model
