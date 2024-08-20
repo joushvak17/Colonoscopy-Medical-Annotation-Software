@@ -11,7 +11,7 @@ class VGG19(nn.Module):
 
         Args:
             output_shape (int): The output shape of the model.
-            device (_type_, optional): _description_. Defaults to None.
+            device (_type_, optional): The device to run the model on. Defaults to None.
         """
         super().__init__()
         self.weights = models.VGG19_Weights.DEFAULT
