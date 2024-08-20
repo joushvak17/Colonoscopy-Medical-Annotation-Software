@@ -268,13 +268,17 @@ with mlflow.start_run():
                 all_labels.extend(labels.cpu().numpy())
                 all_probs.extend(probs.cpu().numpy())
 
+        # Convert lists to numpy arrays
+        all_labels = np.array(all_labels)
+        all_probs = np.array(all_probs)
+
         # Calculate metrics
         roc_auc = roc_auc_score(all_labels, all_probs, multi_class='ovr')
         logloss = log_loss(all_labels, all_probs)
-        class_report = classification_report(all_labels, np.argmax(all_probs, axis=1), 
-                                             output_dict=True)
+        predicted_labels = np.argmax(all_probs, axis=1)
+        class_report = classification_report(all_labels, predicted_labels, output_dict=True)
 
-        # Log metrics with mlflow
+        # Log metrics with MLflow
         mlflow.log_metric("roc_auc", roc_auc)
         mlflow.log_metric("log_loss", logloss)
 
@@ -286,6 +290,7 @@ with mlflow.start_run():
             else:
                 mlflow.log_metric(label, metrics)
 
+        #TODO: Optionally, log the classification report as a JSON file
         # mlflow.log_dict(class_report, "classification_report.json")
     else:
         print("Okay, the model will not be validated.")
