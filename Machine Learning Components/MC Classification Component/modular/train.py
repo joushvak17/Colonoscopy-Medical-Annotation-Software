@@ -180,12 +180,13 @@ else:
     # Set the experiment
     mlflow.set_experiment(experiment_name)
 
+# TODO: Start working on changes to the MLFlow runs implementation
 # Start an MLFlow run
 with mlflow.start_run():
     # Get the run ID
     run_id = mlflow.active_run().info.run_id
 
-    # NOTE: Implement autologging for the model. Currently the PyTorch version is not supported
+    # NOTE: Implement autologging for the model. Current PyTorch version is not supported
     # Log the hyperparameters
     mlflow.log_params(params)
 
@@ -205,9 +206,13 @@ with mlflow.start_run():
 
     end_timer = timer()
 
+    elapsed_time = end_timer - start_timer
+    minutes = int(elapsed_time // 60)
+    seconds = int(elapsed_time % 60)
+
     # Log the training duration and print it
-    mlflow.log_metric("training_duration", end_timer - start_timer)
-    print(f"Training took: {end_timer - start_timer} seconds")
+    mlflow.log_metric("training_duration", elapsed_time)
+    print(f"Training took: {minutes} minutes and {seconds} seconds")
 
     # Prompt the user to save the model locally
     save_prompt = input("Do you want to save and log the model locally? (yes/no): ").lower()
