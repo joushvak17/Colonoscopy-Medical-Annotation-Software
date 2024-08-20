@@ -4,7 +4,7 @@ Defines the training script for the PyTorch model with MLFlow implementation.
 import os
 import argparse
 import inspect
-import data_setup, engine
+import data_setup, engine, utils
 import importlib.util
 import torch
 import torchvision.models as models
@@ -159,7 +159,8 @@ params = {"num_epochs": NUM_EPOCHS,
           "batch_size": BATCH_SIZE,
           "learning_rate": LEARNING_RATE,
           "weight_decay": WEIGHT_DECAY,
-          "hidden_units": HIDDEN_UNITS}
+          "hidden_units": HIDDEN_UNITS,
+          "model_size": utils.get_model_size(model)}
 
 # Set the tracking URI
 # NOTE: Start the tracking server using:
@@ -242,7 +243,7 @@ with mlflow.start_run():
         # Prompt the user if they want to validate the model
         validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
         if validate_prompt == "yes":
-            validation_dir = input("Enter the path to the validation directory: ")
+            validation_dir = "Machine Learning Components/MC Classification Component/data/validation"
             # Load the model from MLflow
             model_uri = f"runs:/{mlflow.active_run().info.run_id}/model"
             model = mlflow.pytorch.load_model(model_uri)
@@ -254,12 +255,15 @@ with mlflow.start_run():
             # Create a DataLoader for the validation data
             validation_dataset = datasets.ImageFolder(validation_dir, transform=test_transform)
             validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False, 
-                                        num_workers=os.cpu_count())
+                                           num_workers=os.cpu_count())
 
             # Evaluate the model on the validation dataset
             all_preds = []
             all_labels = []
             all_probs = []
+
+            # FIXME: Check to see if the validation duration can be logged
+            start_timer = timer()
 
             with torch.no_grad():
                 for images, labels in tqdm(validation_loader):
@@ -270,6 +274,10 @@ with mlflow.start_run():
                     all_preds.extend(preds.cpu().numpy())
                     all_labels.extend(labels.cpu().numpy())
                     all_probs.extend(probs.cpu().numpy())
+
+            end_timer = timer()
+
+            elapsed_time = end_timer - start_timer
 
             # Convert lists to numpy arrays
             all_labels = np.array(all_labels)
@@ -284,6 +292,7 @@ with mlflow.start_run():
             # Log metrics with MLflow
             mlflow.log_metric("roc_auc", roc_auc)
             mlflow.log_metric("log_loss", logloss)
+            mlflow.log_metric("validation_duration", elapsed_time)
 
             # Log the individual class metrics from the classification report
             for label, metrics in class_report.items():
