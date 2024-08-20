@@ -189,12 +189,6 @@ with mlflow.start_run():
     # Log the hyperparameters
     mlflow.log_params(params)
 
-    model_summary = summary(model, input_size=(3, 224, 224), device=device)
-    summary_str = str(model_summary)
-    with open("model_summary.txt", "w") as f:
-        f.write(summary_str)
-    mlflow.log_artifact("model_summary.txt")
-
     # Start training the model using engine.py
     start_timer = timer()
 
