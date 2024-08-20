@@ -63,7 +63,8 @@ HIDDEN_UNITS = args.hidden_units
 # Define the mapping of model names to their torchvision equivalents and default transformations
 TRANSFER_LEARNING_MODELS = {
     "vgg19_model": models.VGG19_Weights.DEFAULT,
-    "efficientnet_b3_model": models.EfficientNet_B3_Weights.DEFAULT
+    "efficientnet_b3_model": models.EfficientNet_B3_Weights.DEFAULT,
+    "mobilenet_v2_model": models.MobileNet_V2_Weights.DEFAULT
 }
 
 # Import the specified model
