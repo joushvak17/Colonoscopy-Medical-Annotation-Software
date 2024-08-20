@@ -4,7 +4,7 @@ conda_env: conda.yaml
 
 entry_points:
     Multi-Class Classification Component:
-        command: command: "python Colonoscopy Medical Annotation Project/MC Classification Component/modular/train.py --num_epochs {num_epochs} --patience {patience} --min_delta {min_delta} --batch_size {batch_size} --learning_rate {learning_rate} --weight_decay {weight_decay} --hidden_units {hidden_units} --model_path {model_path}"
+        command: command: "python Machine Learning Components/MC Classification Component/modular/train.py --num_epochs {num_epochs} --patience {patience} --min_delta {min_delta} --batch_size {batch_size} --learning_rate {learning_rate} --weight_decay {weight_decay} --hidden_units {hidden_units} --model_path {model_path}"
         parameters:
             num_epochs: {type: int, default: 20}
             patience: {type: int, default: 5}
