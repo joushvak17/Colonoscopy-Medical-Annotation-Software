@@ -58,6 +58,7 @@ MIN_DELTA = args.min_delta
 BATCH_SIZE = args.batch_size
 LEARNING_RATE = args.learning_rate
 WEIGHT_DECAY = args.weight_decay
+# TODO: Add a check to see if hidden_units is needed for transfer learning models
 HIDDEN_UNITS = args.hidden_units
 
 # Define the mapping of model names to their torchvision equivalents and default transformations
@@ -122,8 +123,8 @@ if model_class is None:
     raise ValueError(f"Model class not found in {model_script_path}")
 
 # Setup the directories
-train_dir = "Machine Learning Components/MC Classification Component/data/training"
-test_dir = "Machine Learning Components/MC Classification Component/data/testing"
+train_dir = "data/training"
+test_dir = "data/testing"
 
 # Setup target device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -243,7 +244,7 @@ with mlflow.start_run():
         # Prompt the user if they want to validate the model
         validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
         if validate_prompt == "yes":
-            validation_dir = "Machine Learning Components/MC Classification Component/data/validation"
+            validation_dir = "data/validation"
             # Load the model from MLflow
             model_uri = f"runs:/{mlflow.active_run().info.run_id}/model"
             model = mlflow.pytorch.load_model(model_uri)
@@ -262,7 +263,6 @@ with mlflow.start_run():
             all_labels = []
             all_probs = []
 
-            # FIXME: Check to see if the validation duration can be logged
             start_timer = timer()
 
             with torch.no_grad():
@@ -278,6 +278,10 @@ with mlflow.start_run():
             end_timer = timer()
 
             elapsed_time = end_timer - start_timer
+            minutes = int(elapsed_time // 60)
+            seconds = int(elapsed_time % 60)
+
+            print(f"Validation took: {minutes} minutes and {seconds} seconds")
 
             # Convert lists to numpy arrays
             all_labels = np.array(all_labels)
@@ -301,9 +305,6 @@ with mlflow.start_run():
                         mlflow.log_metric(f"{label}_{metric}", value)  
                 else:
                     mlflow.log_metric(label, metrics)
-
-            # TODO: Optionally, log the classification report as a JSON file
-            # mlflow.log_dict(class_report, "classification_report.json")
         else:
             print("Okay, the model will not be validated.")
     else: 

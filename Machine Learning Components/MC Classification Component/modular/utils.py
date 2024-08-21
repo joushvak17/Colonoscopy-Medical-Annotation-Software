@@ -25,7 +25,7 @@ def save_model(model: torch.nn.Module,
     print(f"Saving model to: {model_save_path}")
     torch.save(model.state_dict(), model_save_path)
 
-def get_model_size_in_mb(model: torch.nn.Module) -> float:
+def get_model_size(model: torch.nn.Module) -> float:
     """Calculate the size of a PyTorch model in megabytes (MB) in decimal format.
 
     Args:
