@@ -13,6 +13,7 @@ import mlflow.pytorch
 import numpy as np
 import sys
 import warnings
+import logging
 
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
@@ -20,15 +21,29 @@ from tqdm.auto import tqdm
 from timeit import default_timer as timer
 from sklearn.metrics import classification_report, roc_auc_score, log_loss
 
+# Adjust the path to include the modular directory and where the scripts are located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append("Machine Learning Components/MC Classification Component/modular")
+sys.path.append("Machine Learning Components/MC Classification Component/modular/models")
+
+# Ignore the warnings from setuptools
+warnings.filterwarnings("ignore", message="Setuptools is replacing distutils")
+
+# Configure the logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Function to set tracking URI and experiment
 def set_experiment(model_name):
     # Set the tracking URI
     # NOTE: Start the tracking server using:
     # mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 127.0.0.1 --port 5000
     mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    logger.info("Tracking URI set to http://127.0.0.1:5000")
 
     # Set the experiment name
     experiment_name = f"MC Classification [Model: {model_name}]"
+    logger.info(f"Setting experiment: {experiment_name}")
 
     # Check if the experiment exists
     experiment = mlflow.get_experiment_by_name(experiment_name)
@@ -37,9 +52,11 @@ def set_experiment(model_name):
         # Create the experiment and set it
         experiment_id = mlflow.create_experiment(experiment_name)
         mlflow.set_experiment(experiment_id=experiment_id)
+        logger.info(f"Created and set experiment with ID: {experiment_id}")
     else:
         # Set the experiment
         mlflow.set_experiment(experiment_name)
+        logger.info(f"Experiment already exists. Set experiment: {experiment_name}")
 
 # Function to list available models
 def list_models(): 
@@ -282,14 +299,6 @@ def main(NUM_EPOCHS, PATIENCE, MIN_DELTA, BATCH_SIZE, LEARNING_RATE, WEIGHT_DECA
             print("Okay, the model will not be saved nor logged locally.")
 
 if __name__ == "__main__":
-    # Adjust the path to include the modular directory and where the scripts are located
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    sys.path.append("Machine Learning Components/MC Classification Component/modular")
-    sys.path.append("Machine Learning Components/MC Classification Component/modular/models")
-
-    # Ignore the warnings from setuptools
-    warnings.filterwarnings("ignore", message="Setuptools is replacing distutils")
-
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description="Train a PyTorch multiclassification model on the colonoscopy dataset.")
 
