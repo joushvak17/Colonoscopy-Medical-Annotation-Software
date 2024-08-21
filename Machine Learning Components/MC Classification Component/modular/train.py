@@ -15,8 +15,8 @@ import numpy as np
 import sys
 # Adjust the path to include the modular directory and where the scripts are located
 script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append("modular")
-sys.path.append("modular/models")
+sys.path.append("Machine Learning Components/MC Classification Component/modular")
+sys.path.append("Machine Learning Components/MC Classification Component/modular/models")
 
 import warnings
 # Ignore the warnings from setuptools
@@ -123,8 +123,8 @@ if model_class is None:
     raise ValueError(f"Model class not found in {model_script_path}")
 
 # Setup the directories
-train_dir = "data/training"
-test_dir = "data/testing"
+train_dir = "Machine Learning Components/MC Classification Component/data/training"
+test_dir = "Machine Learning Components/MC Classification Component/data/testing"
 
 # Setup target device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -220,7 +220,7 @@ with mlflow.start_run():
     save_prompt = input("Do you want to save and log the model locally? (yes/no): ").lower()
     if save_prompt == "yes":
         local_model_path = input("Enter the name of the folder you want to create to save the model: ")
-        full_path = "saved_models/" + local_model_path
+        full_path = "Machine Learning Components/MC Classification Component/saved_models/" + local_model_path
         # Check if the folder already exists, if not create it
         # FIXME: Check to see if new folder name can be given if it already exists
         if os.path.exists(full_path):
@@ -244,7 +244,7 @@ with mlflow.start_run():
         # Prompt the user if they want to validate the model
         validate_prompt = input("Do you want to validate the model? (yes/no): ").lower()
         if validate_prompt == "yes":
-            validation_dir = "data/validation"
+            validation_dir = "Machine Learning Components/MC Classification Component/data/validation"
             # Load the model from MLflow
             model_uri = f"runs:/{mlflow.active_run().info.run_id}/model"
             model = mlflow.pytorch.load_model(model_uri)
