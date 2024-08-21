@@ -20,6 +20,27 @@ from tqdm.auto import tqdm
 from timeit import default_timer as timer
 from sklearn.metrics import classification_report, roc_auc_score, log_loss
 
+# Function to set tracking URI and experiment
+def set_experiment(model_name):
+    # Set the tracking URI
+    # NOTE: Start the tracking server using:
+    # mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 127.0.0.1 --port 5000
+    mlflow.set_tracking_uri("http://127.0.0.1:5000")
+
+    # Set the experiment name
+    experiment_name = f"MC Classification [Model: {model_name}]"
+
+    # Check if the experiment exists
+    experiment = mlflow.get_experiment_by_name(experiment_name)
+
+    if experiment is None:
+        # Create the experiment and set it
+        experiment_id = mlflow.create_experiment(experiment_name)
+        mlflow.set_experiment(experiment_id=experiment_id)
+    else:
+        # Set the experiment
+        mlflow.set_experiment(experiment_name)
+
 # Function to list available models
 def list_models(): 
     models_dir = os.path.join(script_dir, "models")
@@ -129,25 +150,6 @@ def main(NUM_EPOCHS, PATIENCE, MIN_DELTA, BATCH_SIZE, LEARNING_RATE, WEIGHT_DECA
             "weight_decay": WEIGHT_DECAY,
             "hidden_units": HIDDEN_UNITS,
             "model_size": utils.get_model_size(model)}
-    
-    # Set the tracking URI
-    # NOTE: Start the tracking server using:
-    # mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 127.0.0.1 --port 5000
-    mlflow.set_tracking_uri("http://127.0.0.1:5000")
-
-    # Set the experiment name
-    experiment_name = f"MC Classification [Model: {model_name}]"
-
-    # Check if the experiment exists
-    experiment = mlflow.get_experiment_by_name(experiment_name)
-
-    if experiment is None:
-        # Create the experiment and set it
-        experiment_id = mlflow.create_experiment(experiment_name)
-        mlflow.set_experiment(experiment_id=experiment_id)
-    else:
-        # Set the experiment
-        mlflow.set_experiment(experiment_name)
 
     # TODO: Start working on changes to the MLFlow runs implementation
     # Start an MLFlow run
@@ -315,6 +317,9 @@ if __name__ == "__main__":
     # TODO: Add a check to see if hidden_units is needed for transfer learning models
     HIDDEN_UNITS = args.hidden_units
     MODEL_PATH = args.model_path
+    
+    # Call the set_experiment function
+    set_experiment(os.path.basename(MODEL_PATH).replace(".py", ""))
 
     # Call the main function
     main(NUM_EPOCHS, PATIENCE, MIN_DELTA, BATCH_SIZE, LEARNING_RATE, WEIGHT_DECAY, HIDDEN_UNITS, MODEL_PATH)
