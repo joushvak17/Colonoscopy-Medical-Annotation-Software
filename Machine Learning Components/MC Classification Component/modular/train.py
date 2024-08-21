@@ -192,7 +192,6 @@ def main(NUM_EPOCHS, PATIENCE, MIN_DELTA, BATCH_SIZE, LEARNING_RATE, WEIGHT_DECA
                 local_model_path = input("Enter the name of the folder you want to create to save the model: ")
                 full_path = "Machine Learning Components/MC Classification Component/saved_models/" + local_model_path
                 # Check if the folder already exists, if not create it
-                # FIXME: Check to see if new folder name can be given if it already exists
                 if os.path.exists(full_path):
                     print(f"Folder {full_path} already exists. Please choose another name.")
                 else:
@@ -301,7 +300,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=32, help="Number of samples per batch. Default is 32.")
     parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate for the optimizer. Default is 0.001.")
     parser.add_argument("--weight_decay", type=float, default=1e-4, help="Weight decay for the optimizer. Default is 0.0001.")
-    parser.add_argument("--hidden_units", type=int, default=10, help="Number of hidden units in the model. Default is 10. Not needed for transfer learning models.")
+    parser.add_argument("--hidden_units", type=int, default=None, help="Number of hidden units in the model. Default is None. Not needed for transfer learning models.")
     parser.add_argument("--model_path", type=str, required=True, help=f"Path to the model file. Argument is required. Available models: {list_models()}")
 
     # Parse the arguments
@@ -314,7 +313,6 @@ if __name__ == "__main__":
     BATCH_SIZE = args.batch_size
     LEARNING_RATE = args.learning_rate
     WEIGHT_DECAY = args.weight_decay
-    # TODO: Add a check to see if hidden_units is needed for transfer learning models
     HIDDEN_UNITS = args.hidden_units
     MODEL_PATH = args.model_path
     
