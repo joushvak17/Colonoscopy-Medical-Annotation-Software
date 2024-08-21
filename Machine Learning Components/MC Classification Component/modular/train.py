@@ -30,8 +30,11 @@ sys.path.append("Machine Learning Components/MC Classification Component/modular
 warnings.filterwarnings("ignore", message="Setuptools is replacing distutils")
 
 # Configure the logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Test logging statement
+logger.info("Logging is configured correctly.")
 
 # Function to set tracking URI and experiment
 def set_experiment(model_name):
@@ -66,6 +69,11 @@ def list_models():
     return ", ".join(model_files)    
 
 def main(NUM_EPOCHS, PATIENCE, MIN_DELTA, BATCH_SIZE, LEARNING_RATE, WEIGHT_DECAY, HIDDEN_UNITS, MODEL_PATH):
+    # Add a logging statement to indicate the start of the main function
+    logger.info("Starting the main function with the following parameters:")
+    logger.info(f"num_epochs: {NUM_EPOCHS}, patience: {PATIENCE}, min_delta: {MIN_DELTA}, batch_size: {BATCH_SIZE}, 
+                learning_rate: {LEARNING_RATE}, weight_decay: {WEIGHT_DECAY}, hidden_units: {HIDDEN_UNITS}, model_path: {MODEL_PATH}")
+    
     # Define the mapping of model names to their torchvision equivalents and default transformations
     TRANSFER_LEARNING_MODELS = {
         "vgg19_model": models.VGG19_Weights.DEFAULT,
