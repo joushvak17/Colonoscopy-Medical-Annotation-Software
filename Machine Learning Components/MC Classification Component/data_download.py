@@ -1,6 +1,5 @@
 import os
 import shutil
-import kaggle
 from kaggle.api.kaggle_api_extended import KaggleApi
 from sklearn.model_selection import train_test_split
 
