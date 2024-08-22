@@ -29,6 +29,7 @@ sys.path.append("Machine Learning Components/MC Classification Component/modular
 # Ignore the warnings from setuptools
 warnings.filterwarnings("ignore", message="Setuptools is replacing distutils")
 
+# FIXME: The logging configuration is not working as expected
 # Configure the logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -71,7 +72,6 @@ def list_models():
 def main(NUM_EPOCHS, PATIENCE, MIN_DELTA, BATCH_SIZE, LEARNING_RATE, WEIGHT_DECAY, HIDDEN_UNITS, MODEL_PATH):
     # Add a logging statement to indicate the start of the main function
     logger.info("Starting the main function with the following parameters:")
-    logger.info(f"num_epochs: {NUM_EPOCHS}, patience: {PATIENCE}, min_delta: {MIN_DELTA}, batch_size: {BATCH_SIZE}, learning_rate: {LEARNING_RATE}, weight_decay: {WEIGHT_DECAY}, hidden_units: {HIDDEN_UNITS}, model_path: {MODEL_PATH}")
     
     # Define the mapping of model names to their torchvision equivalents and default transformations
     TRANSFER_LEARNING_MODELS = {
@@ -175,7 +175,6 @@ def main(NUM_EPOCHS, PATIENCE, MIN_DELTA, BATCH_SIZE, LEARNING_RATE, WEIGHT_DECA
             "hidden_units": HIDDEN_UNITS,
             "model_size": utils.get_model_size(model)}
 
-    # TODO: Start working on changes to the MLFlow runs implementation
     # Start an MLFlow run
     with mlflow.start_run():
         # Get the run ID
