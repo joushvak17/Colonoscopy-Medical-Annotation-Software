@@ -1,13 +1,17 @@
 import os
 import shutil
-import opendatasets as od
+import kaggle
+from kaggle.api.kaggle_api_extended import KaggleApi
 from sklearn.model_selection import train_test_split
 
-# Download the dataset for the multi-class classification component
-od.download("https://www.kaggle.com/datasets/yasserhessein/the-kvasir-dataset")
+# Initialize the Kaggle API
+api = KaggleApi()
+api.authenticate()
 
-# Define the source path where the dataset is downloaded
-source_path = "the-kvasir-dataset/kvasir-dataset-v2"
+# Download the dataset for the multi-class classification component
+dataset_name = "yasserhessein/the-kvasir-dataset"
+api.dataset_download_files(dataset_name, path=".", force=True, quiet=False, unzip=True)
+dataset = "kvasir-dataset-v2"
 
 # Define the paths for training, testing, and validation
 train_path = "data/training"
@@ -24,8 +28,8 @@ for path in [train_path, test_path, validation_path]:
     os.makedirs(path, exist_ok=True)    
     
 # Process each class
-for class_name in os.listdir(source_path):
-    class_dir = os.path.join(source_path, class_name)
+for class_name in os.listdir(dataset):
+    class_dir = os.path.join(dataset, class_name)
     if os.path.isdir(class_dir):
         # List all images
         images = [os.path.join(class_dir, f) for f in os.listdir(class_dir) if os.path.isfile(os.path.join(class_dir, f))]
@@ -46,7 +50,7 @@ for class_name in os.listdir(source_path):
         copy_files(val, os.path.join(validation_path, class_name))
 
 # Delete the downloaded dataset
-shutil.rmtree("the-kvasir-dataset")
+shutil.rmtree("kvasir-dataset-v2")
 
 # Get the length of the training, testing, and validation datasets
 train_path = "data/training/normal-z-line"
