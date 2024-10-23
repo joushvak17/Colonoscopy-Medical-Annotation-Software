@@ -2,22 +2,9 @@
 data/
 saved_models/
 mlruns/
-.vs/
-bin/
-obj/
 
 # Files
 mlflow.db
-*.user
-*.rsuser
-*.suo
-*.userosscache
-*.sln.docstates
-
-# NuGet packages
-*.nupkg
-*.snupkg
-packages/
 
 # Misc
 __pycache__
